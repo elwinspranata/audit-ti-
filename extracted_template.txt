@@ -1,0 +1,417 @@
+Joint Risk Assessment
+<Insert Assessment Name Here>
+Report to Management
+
+Internal Audit Contacts Audit Director Audit Manager Lead Auditor
+
+<Name & Phone ###.###.###> <Name & Phone ###.###.###> <Name & Phone ###.###.###>
+
+XYZ Company Internal Audit Department
+123 Audit Lance Anywhere, ZZ 99999
+
+Confidential XYZ Company
+
+Joint Risk Assessment: <Audit Name Here>
+Executive Summary
+Overall Summary of Assessment Results
+< Include a concise summary of overall assessment results here.> < ringkasan singkat dari keseluruhan hasil penilaian di sini >
+Background & Scope
+< Include a brief background and summary of audit scope here.> <Sertakan latar belakang singkat dan ringkasan ruang lingkup audit di sini.>
+
+XYZ Company
+At-A-Glance
+Maturity Rating Overall: Actual Here Client's Target: Target Here
+Audit Issues Priority A: # Here Priority B: # Here Priority C: # Here (Prioritas Proses TI)
+Detailed Observations Optimized: # Here Managed: # Here Defined: # Here Repeatable: # Here Initial: # Here
+Prior Audit Report Audit: Audit Name Here Issue Date: Date Here
+
+Commented [cn1]: Rangkuman jumalah proses TI pada masingmasing level. Misal dari 5 Proses TI yang diaudit 1 optimized, 2 managed, 3 defined
+Commented [cn2]: Laporan audit terdahulu. Audit name bisa isianya: Audit Proses TI, Audit Keamanan, Audit Kepatuhan, dst. Contoh pengisian: Audit; Audit Tata Kelola Issue Date : 12 Januari 2020
+
+Responsible Officer Overall Response
+Response from <Name & Title of Client Officer Here> (date):
+<Insert Response Here>
+sikap organisasi terhadap hasil audit (menerima / sebagian / menolak), contoh: "Berdasarkan hasil asesmen yang telah dilakukan, kami menerima temuan dan rekomendasi yang disampaikan. Organisasi berkomitmen untuk menindaklanjuti area prioritas perbaikan sesuai dengan rencana peningkatan tata kelola TI yang telah ditetapkan."
+
+Reportable Issues & Client Supplied Corrective Actions
+
+Control Weakness
+
+Priority
+
+Corrective Action
+
+Title of Issue <Description of issue here including impact statement and recommendation>.
+
+A B C
+
+Response From: <Client Officer Name & Title Here>
+
+Relevant COBIT Detailed Objective: DS5.4 User Account Management EXAMPLE
+
+<Insert client response here>
+
+Title of Issue <Description of issue here including impact statement and recommendation>.
+Relevant COBIT Detailed Objective: DS5.4 User Account Management EXAMPLE
+
+A B C
+
+Response From: <Client Officer Name & Title Here>
+<Insert client response here>
+
+Title of Issue <Description of issue here including impact statement and recommendation>.
+Relevant COBIT Detailed Objective: DS5.4 User Account Management EXAMPLE
+
+A B C
+
+Response From: <Client Officer Name & Title Here>
+<Insert client response here>
+
+Due Date
+
+Internal Audit Department
+
+Page 1
+
+Joint Risk Assessment: <Audit Name Here>
+
+XYZ Company
+
+Internal Audit Department
+
+Page 2
+
+Joint Risk Assessment: <Audit Name Here>
+
+XYZ Company
+
+COBIT Objectives
+High-level Objective Name Here
+Detailed Objectives: · <All detailed level
+objectives included in the scope of the audit should be listed here.> · Daftar semua proses TI yang dilakukan proses AUDIT dimasukan didalam sisin
+
+Capability
+Level
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+
+Contoh
+
+High-level Objective Name Here
+
+Detailed Objective 1. EDM-01 2. EDM-03 3. APO-01 4. APO-03 5. APO-05 6. APO-09 7. APO-13 8. BAI-01 9. BAI-03 10. DSS-01 11. MEA-02 12. MEA-04
+
+Strategic Focal Points
+(By COBIT High-Level Control Objective)
+
+Rating Justification
+<IAD Internal Note: This section highlights assessment results for each of the COBIT high-level objectives included in scope. There is one row per high-level objective (COBIT detailed level objectives are noted in the far left column).>
+
+Indicators/Metrics
+· List key indicators here (ditulis oleh Auditor)
+·...
+
+Include an overall conclusion statement summarizing the results that support the rating (similar to the old IAD audit report).
+· Include concise bullet point items that provide further detail to justify the rating.
+· Another bullet.  Sub-bullets only when necessary. ...
+----------------------------------------------------
+Contoh: Catatan yang diberikan oleh Auditor
+"Secara keseluruhan, objective APO telah berjalan cukup efektif dengan kontrol utama tersedia dan diterapkan. Namun, masih terdapat kelemahan pada konsistensi dokumentasi dan pengukuran kinerja yang mempengaruhi tingkat kapabilitas proses."
+Contoh:  Proses perencanaan TI telah selaras dengan tujuan bisnis utama.  SOP tersedia, namun belum diperbarui secara berkala.  Monitoring kinerja dilakukan, tetapi KPI belum terdefinisi secara formal.
+· KPI masih bersifat operasional dan belum terintegrasi lintas unit.
+
+IT Process
+Standard Images
+COBIT: DSS-01 Configuration Baseline
+Sustaining Secure Configurations
+COBIT: DSS-04 Configuration Control
+
+COBIT Rating
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+
+IT Process Focal Points
+(By COBIT Detailed Control Objective)
+Rating Justification
+· Concise bullet-points that support the rating.
+<IAD Internal Note: This section highlights the top 3 ­5 key controls that are critical to the success of the function being assessed. Each row included here equates to a row in the COBIT Control Assessment Questionnaire.>
+Diisi oleh auditor
+· Concise bullet-points that support the rating.
+
+Monitoring Device Security
+COBIT: DSS-05 Violation & Security Activity Reports
+
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+
+· Concise bullet-points that support the rating.
+
+Vulnerability Assessment
+COBIT: DS5.7 Security Surveillance
+
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+
+· Concise bullet-points that support the rating.
+
+Indicators/Metrics
+· List key indicators here
+·...
+· List key indicators here
+·...
+· List key indicators here
+·...
+· List key indicators here
+·...
+
+Internal Audit Department
+
+Page 3
+
+Joint Risk Assessment: <Audit Name Here>
+
+Controls
+Standard Images
+COBIT: DS9.2 Configuration Baseline
+Sustaining Secure Configurations
+COBIT: DS9.4 Configuration Control
+
+COBIT Rating
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+
+Control Focal Points
+(By COBIT Detailed Control Objective)
+Rating Justification
+· Concise bullet-points that support the rating.
+<IAD Internal Note: This section highlights the top 3 ­5 key controls that are critical to the success of the function being assessed. Each row included here equates to a row in the COBIT Control Assessment Questionnaire.>
+Diisi oleh auditor
+· Concise bullet-points that support the rating.
+
+Monitoring Device Security
+COBIT: DS5.10 Violation & Security Activity Reports
+
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+
+· Concise bullet-points that support the rating.
+
+Vulnerability Assessment
+COBIT: DS5.7 Security Surveillance
+
+ 5: Optimizing  4: Predictable  3: Established  2: Managed  1: Performed  0: Incomplete
+
+· Concise bullet-points that support the rating.
+
+XYZ Company
+Indicators/Metrics
+· List key indicators here
+·...
+· List key indicators here
+·...
+· List key indicators here
+·...
+· List key indicators here
+·...
+
+Internal Audit Department
+
+Page 4
+
+Joint Risk Assessment: <Audit Name Here>
+
+XYZ Company
+
+ILLUSTRATIVE EXAMPLE ONLY (Not representative of a real environment)
+
+Windows Fileservers
+(McAfee NetShield)
+4
+
+Desktop Population
+(McAfee VirusScan)
+5
+
+Exchange Servers (Trend Micro
+ScanMail)
+
+Exchange
+
+Public Folders
+
+(McAfee
+
+6 GroupShield)
+
+3
+
+Workflow Diagram
+(Overview of Key Tasks & Control Points)
+E-Mail Infrastructure Overview
+
+Mail Service Gateway (In)
+(McAfee WebShield)
+Mail Service Gateway (Out)
+(McAfee WebShield)
+Mail Service Gateway (In)
+(McAfee WebShield)
+Mail Service Gateway (Out)
+(McAfee WebShield)
+2
+
+TCVS
+SMTP E-Mail Relay (PHX) (TrendMicro
+InterScan)
+1
+SMTP E-Mail Relay (SFO) (TrendMicro
+InterScan)
+
+Firewall PHX
+Firewall SFO
+
+Internet
+
+Process Steps
+Provides Internet gateway protection. TVC server polled on an hourly basis for vendor software updates.
+Second line of defense used to scan in/out bound Exchange E-mail messages. Software updated weekly or as necessary.
+All Exchange in/out bound e-mail messages are scanned. TVC server polled on an hourly basis for vendor software updates.
+Home and Public network drives on-access/active scanning. All files scanned weekly on all local drives. Software updated bi-weekly or as necessary with Castanet.
+Download and on-access scanning. All files scanned weekly on all local drives. Software updated bi-weekly with Castanet.
+Active scan of all attachments in mail queues and weekly scan of all attachments in mail stores. Software updated bi-weekly with Castanet.
+
+Control Point
+Reference .
+1
+
+Control Type
+(manual or system)
+
+2
+
+3
+
+4
+
+5
+
+6
+
+LEGEND: Manual control.
+Programmed control.
+
+Performance Indicator
+
+Internal Audit Department
+
+Page 5
+
+Joint Risk Assessment: <Audit Name Here>
+COBIT Capability Rating & Issue Priority Definitions
+
+XYZ Company
+
+<IAD Internal Note: Auditors, like with the questionnaire please choose between this page and the following page, depending on whether you will use the generic rating definition or a specific rating definition to assign your overall audit rating.>
+
+Legend For Generic COBIT Management Guidelines Capability Ratings
+
+COBIT Capability Ratings
+0 - Incomplete
+
+Definition
+Proses tidak dijalankan atau dijalankan secara tidak konsisten sehingga tujuan proses tidak tercapai. Tidak terdapat bukti pelaksanaan proses yang memadai, dan aktivitas yang dilakukan bersifat sporadis tanpa struktur yang jelas. Organisasi belum menunjukkan pendekatan pengelolaan proses yang dapat diandalkan.
+
+1 ­ Performed
+
+Proses telah dilaksanakan dan menghasilkan output dasar sesuai tujuan proses. Terdapat bukti bahwa aktivitas proses dilakukan, namun pelaksanaannya masih bersifat individual dan belum terkelola secara formal. Dokumentasi, pengendalian, dan konsistensi antar pelaksana belum tersedia secara memadai.
+
+2 ­ Managed
+
+Proses telah direncanakan, dipantau, dan dikendalikan. Organisasi telah menetapkan tanggung jawab, mengelola sumber daya, serta menyediakan dokumentasi dasar. Meskipun demikian, penerapan proses masih terbatas pada unit atau kondisi tertentu dan belum sepenuhnya terstandarisasi di seluruh
+
+organisasi.
+
+3 ­ Established
+
+Proses telah didefinisikan secara formal dan terdokumentasi dalam kebijakan atau prosedur standar. Proses diterapkan secara konsisten di seluruh organisasi dan dipahami oleh pihak-pihak terkait. Pendekatan pengelolaan proses sudah terstruktur dan selaras dengan praktik yang ditetapkan.
+
+4 ­ Predictable
+
+Proses dijalankan secara terukur dan terkendali menggunakan indikator kinerja yang telah ditetapkan. Data kinerja digunakan untuk memantau, mengevaluasi, dan mengendalikan proses sehingga hasilnya dapat diprediksi. Variasi kinerja dapat diidentifikasi dan dikelola secara sistematis.
+
+5 ­ Optimizing
+
+Proses secara berkelanjutan ditingkatkan melalui analisis kinerja, pembelajaran organisasi, dan penerapan inovasi. Organisasi secara proaktif mengidentifikasi peluang perbaikan dan mengoptimalkan proses untuk meningkatkan efektivitas, efisiensi, dan nilai bisnis. Pendekatan pengelolaan proses telah berorientasi pada perbaikan berkelanjutan.
+
+Issue Priorities
+A
+B
+C
+
+Definition
+Sign-off Authority: EVP ( 30 hari) These represent the highest level of significance and generally pose material risk to the company if not
+resolved in a timely manner.
+Sign-off Authority: SVP ( 60 hari) Pose less risk but will have an adverse impact on the company if the underlying issues are not properly addressed.
+Sign-off Authority: VP ( 90 hari) Opportunities to enhance the existing control environment to ensure continued compliance with company and regulatory guidelines.
+
+<Insert client names here in alphabetical order>
+
+Distribution
+
+Internal Audit Department
+
+Page 6
+
+Joint Risk Assessment: <Audit Name Here>
+COBIT Maturity Rating & Issue Priority Definitions
+
+XYZ Company
+
+<IAD Internal Note: Auditors, like with the questionnaire, please choose between this page and the previous page, depending on whether you will use the generic rating definition or a specific rating definition to assign your overall rating.
+Example: For the Problem Management audit, we would use the specific guidelines as follows:>
+
+Legend For COBIT Management Guidelines Maturity Ratings
+
+DS10 Manage Problems and Incidents
+
+COBIT Maturity Ratings
+0 - Non-Existent
+
+Definition
+There is no awareness of the need for managing problems and incidents. The problem-solving
+
+process is informal and users and IT staff deal individually with problems on a case-by-case basis.
+
+1 ­ Initial
+
+The organization has recognized that there is a need to solve problems and evaluate incidents. Key
+
+knowledgeable individuals provide some assistance with problems relating to their area of expertise
+
+and responsibility. The information is not shared with others and solutions vary from one support
+
+person to another, resulting in additional problem creation and loss of productive time, while
+
+searching for answers. Management frequently changes the focus and direction of the operations and
+
+technical support staff.
+
+2 ­ Repeatable 3 ­ Defined 4 ­ Managed 5 ­ Optimized
+
+There is a wide awareness of the need to manage IT related problems and incidents within both the business units and information services function. The resolution process has evolved to a point where a few key individuals are responsible for managing the problems and incidents occurring. Information is shared among staff; however, the process remains unstructured, informal and mostly reactive. The service level to the user community varies and is hampered by insufficient structured knowledge available to the problem solvers. Management reporting of incidents and analysis of problem creation is limited and informal. The need for an effective problem management system is accepted and evidenced by budgets for the staffing, training and support of response teams. Problem solving, escalation and resolution processes have been standardized, but are not sophisticated. Nonetheless, users have received clear communications on where and how to report on problems and incidents. The recording and tracking of problems and their resolutions is fragmented within the response team, using the available tools without centralization or analysis. Deviations from established norms or standards are likely to go undetected. The problem management process is understood at all levels within the organization. Responsibilities and ownership are clear and established. Methods and procedures are documented, communicated and measured for effectiveness. The majority of problems and incidents are identified, recorded, reported and analyzed for continuous improvement and are reported to stakeholders. Knowledge and expertise are cultivated, maintained and developed to higher levels as the function is viewed as an asset and major contributor to the achievement of IT objectives. The incident response capability is tested periodically. Problem and incident management is well integrated with interrelated processes, such as change, availability and configuration management, and assists customers in managing data, facilities and operations. The problem management process has evolved into a forward-looking and proactive one, contributing to the IT objectives. Problems are anticipated and may even be prevented. Knowledge is maintained, through regular contacts with vendors and experts, regarding patterns of past and future problems and incidents. The recording, reporting and analysis of problems and resolutions is automated and fully integrated with configuration data management. Most systems have been equipped with automatic detection and warning mechanism, which are continuously tracked and evaluated.
+
+Issue Priorities
+A
+B
+C
+
+Definition
+Sign-off Authority: EVP These represent the highest level of significance and generally pose material risk to the company if not
+resolved in a timely manner.
+Sign-off Authority: SVP Pose less risk but will have an adverse impact on the company if the underlying issues are not properly addressed.
+Sign-off Authority: VP Opportunities to enhance the existing control environment to ensure continued compliance with company and regulatory guidelines.
+
+<Insert client names here in alphabetical order>
+
+Distribution
+
+Internal Audit Department
+
+Page 7
+
+

@@ -4,12 +4,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Support\Facades\Auth;
 use App\Services\UserProgressService; // Import Service
+use App\Models\Assessment;
 use App\Models\CobitItem;
 use App\Models\JawabanDraft;
 use Barryvdh\DomPDF\Facade\Pdf as FacadePdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
-use PDF;
+use Illuminate\Http\Request;
 
 class UserProgressController extends Controller
 {
@@ -24,35 +25,61 @@ class UserProgressController extends Controller
     /**
      * Menampilkan halaman progres untuk user yang sedang login.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
         $user = Auth::user();
+        
+        // Get assessment from request or use latest one
+        $assessmentId = $request->input('assessment_id');
+        $assessment = null;
+        
+        if ($assessmentId) {
+            $assessment = Assessment::where('user_id', $user->id)->find($assessmentId);
+        }
+        
+        if (!$assessment) {
+            $assessment = Assessment::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
 
-        // --- PERBAIKAN DI SINI ---
-        // Logika gerbang yang mengharuskan semua audit selesai telah dihapus.
-        // Sekarang, halaman progres bisa diakses kapan saja.
+        // Panggil service untuk mendapatkan data progres.
+        $progressData = $this->progressService->getProgressData($user, $assessment ? $assessment->id : null);
 
-        // Panggil service untuk mendapatkan data progres, apa pun statusnya.
-        $progressData = $this->progressService->getProgressData($user);
+        // Ambil draft untuk assessment ini
+        $incompleteDraftsQuery = JawabanDraft::with(['level.kategori.cobitItem'])
+            ->where('user_id', $user->id);
+            
+        if ($assessment) {
+            $incompleteDraftsQuery->where('assessment_id', $assessment->id);
+        }
+        
+        $incompleteDrafts = $incompleteDraftsQuery->get();
 
-        // Ambil draft yang belum diselesaikan untuk notifikasi
-        $incompleteDrafts = JawabanDraft::with(['level.kategori.cobitItem'])
-            ->where('user_id', $user->id)
-            ->get();
-
-        return view('user.progress.index', compact('user', 'progressData', 'incompleteDrafts'));
+        return view('user.progress.index', compact('user', 'progressData', 'incompleteDrafts', 'assessment'));
     }
 
     /**
      * Menangani download PDF untuk user yang sedang login.
      */
-    public function downloadPDF()
+    public function downloadPDF(Request $request)
     {
         $user = Auth::user();
+        
+        $assessmentId = $request->input('assessment_id');
+        $assessment = null;
+        
+        if ($assessmentId) {
+            $assessment = Assessment::where('user_id', $user->id)->find($assessmentId);
+        }
+        
+        if (!$assessment) {
+            $assessment = Assessment::where('user_id', $user->id)
+                ->orderBy('created_at', 'desc')
+                ->first();
+        }
 
-        // Logika di sini tidak perlu diubah, karena ia akan mencetak
-        // progres saat ini, baik sudah selesai maupun belum.
-        $progressData = $this->progressService->getProgressData($user);
+        $progressData = $this->progressService->getProgressData($user, $assessment ? $assessment->id : null);
 
         $data = [
             'user' => $user,

@@ -21,8 +21,8 @@
             <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
                 <div>
                     <div class="flex items-center gap-3 mb-2">
-                        <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 rounded-lg text-xs font-semibold">
-                            Assessment
+                        <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ $assessment->package_id ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' }}">
+                            {{ $assessment->source_label }}
                         </span>
                         <span class="text-gray-400 dark:text-gray-500">•</span>
                         <span class="text-sm text-gray-500 dark:text-gray-400">{{ $assessment->created_at->format('d M Y') }}</span>
@@ -82,33 +82,42 @@
 
                 {{-- Progress Details --}}
                 <div class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-lg animate-fadeInUp animation-delay-200" style="opacity:0;">
-                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 flex items-center">
+                    <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-6 flex items-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
                         </svg>
                         COBIT Framework Coverage
                     </h2>
-                    <div class="space-y-4">
+                    <div class="grid gap-4">
                         @foreach($assessment->items as $item)
-                            <div class="p-5 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl group hover:border-blue-400 dark:hover:border-blue-500 transition-all">
-                                <div class="flex items-start justify-between mb-4">
+                            <div class="relative overflow-hidden p-6 bg-gray-50 dark:bg-slate-900/50 border border-gray-100 dark:border-slate-700/50 rounded-2xl group hover:border-blue-400 dark:hover:border-blue-500 transition-all duration-300">
+                                <div class="flex items-center justify-between mb-5">
                                     <div class="flex items-center gap-4">
-                                        <div class="w-12 h-12 bg-gray-200 dark:bg-slate-700 rounded-xl flex items-center justify-center text-sm font-bold text-gray-600 dark:text-gray-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
+                                        <div class="flex-shrink-0 w-14 h-14 bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700 rounded-xl flex items-center justify-center text-xs font-bold text-gray-400 dark:text-gray-500 group-hover:text-blue-500 group-hover:border-blue-200 dark:group-hover:border-blue-900 transition-all shadow-sm">
                                             {{ $item->cobitItem->nama_item }}
                                         </div>
                                         <div>
-                                            <h4 class="font-bold text-gray-800 dark:text-white">{{ $item->cobitItem->nama_item }}</h4>
-                                            <p class="text-sm text-gray-500 dark:text-gray-400 max-w-md">{{ Str::limit($item->cobitItem->deskripsi, 80) }}</p>
+                                            <h4 class="text-lg font-bold text-gray-800 dark:text-white leading-tight">
+                                                {{ $item->cobitItem->nama_item }}
+                                            </h4>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-sm line-clamp-2">
+                                                {{ $item->cobitItem->deskripsi }}
+                                            </p>
                                         </div>
                                     </div>
                                     <div class="text-right">
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">Progress</p>
-                                        <span class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ $item->progress }}%</span>
+                                        <p class="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Progress</p>
+                                        <p class="text-2xl font-black text-blue-600 dark:text-blue-400">
+                                            {{ $item->progress }}<span class="text-lg">%</span>
+                                        </p>
                                     </div>
                                 </div>
-                                <div class="w-full h-2.5 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden">
-                                    <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500" style="width: {{ $item->progress }}%"></div>
+                                <div class="w-full h-3 bg-gray-200 dark:bg-slate-700 rounded-full overflow-hidden shadow-inner">
+                                    <div class="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-700 ease-out" style="width: {{ $item->progress }}%"></div>
                                 </div>
+                                
+                                {{-- Subtle glass effect on hover --}}
+                                <div class="absolute inset-0 bg-gradient-to-tr from-blue-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
                             </div>
                         @endforeach
                     </div>
@@ -158,13 +167,73 @@
                         </div>
                     @endif
 
-                    @if($assessment->admin_notes)
+                @if($assessment->admin_notes)
                         <div class="mt-4 p-4 bg-gray-50 dark:bg-slate-900 border border-gray-200 dark:border-slate-700 rounded-xl">
                             <p class="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase mb-1">Catatan Admin</p>
                             <p class="text-sm text-gray-700 dark:text-gray-300">{{ $assessment->admin_notes }}</p>
                         </div>
                     @endif
                 </div>
+
+                {{-- Auditor Assignment Card --}}
+                @if($assessment->status == 'completed' || $assessment->status == 'verified')
+                    <div class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-lg animate-fadeInUp animation-delay-200" style="opacity:0;">
+                        <h2 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4 flex items-center">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                            Penugasan Auditor
+                        </h2>
+                        
+                        @if($assessment->assignedAuditor)
+                            {{-- Auditor sudah ditugaskan --}}
+                            <div class="flex items-center gap-4 p-4 bg-purple-50 dark:bg-purple-900/30 border border-purple-200 dark:border-purple-800 rounded-xl">
+                                <div class="w-12 h-12 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
+                                    {{ strtoupper(substr($assessment->assignedAuditor->name, 0, 1)) }}
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-gray-800 dark:text-white">{{ $assessment->assignedAuditor->name }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $assessment->assignedAuditor->email }}</p>
+                                    <p class="text-xs text-purple-600 dark:text-purple-400 mt-1">
+                                        Ditugaskan pada {{ $assessment->assigned_at->format('d M Y, H:i') }}
+                                    </p>
+                                </div>
+                                <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900/50 text-purple-700 dark:text-purple-400 rounded-lg text-xs font-semibold">
+                                    Auditor
+                                </span>
+                            </div>
+                        @elseif($assessment->status == 'completed')
+                            {{-- Form assign auditor --}}
+                            <form action="{{ route('admin.assessments.assign-auditor', $assessment) }}" method="POST">
+                                @csrf
+                                <div class="mb-4">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Pilih Auditor</label>
+                                    <select name="assigned_auditor_id" required
+                                        class="w-full px-4 py-3 bg-gray-50 dark:bg-slate-900 border border-gray-300 dark:border-slate-600 rounded-xl focus:ring-2 focus:ring-purple-500 text-gray-900 dark:text-white transition-all">
+                                        <option value="" disabled selected>Pilih auditor yang akan ditugaskan...</option>
+                                        @foreach($auditors as $auditor)
+                                            <option value="{{ $auditor->id }}">{{ $auditor->name }} ({{ $auditor->email }})</option>
+                                        @endforeach
+                                    </select>
+                                    @error('assigned_auditor_id')
+                                        <p class="mt-2 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <button type="submit" class="w-full px-6 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg shadow-purple-500/25 transition-all">
+                                    <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                                    </svg>
+                                    Tugaskan Auditor
+                                </button>
+                            </form>
+                            @if($auditors->isEmpty())
+                                <p class="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+                                    Tidak ada auditor tersedia. Silakan tambahkan user dengan role auditor terlebih dahulu.
+                                </p>
+                            @endif
+                        @endif
+                    </div>
+                @endif
 
                 {{-- Timeline Card --}}
                 <div class="p-6 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700 rounded-2xl shadow-lg animate-fadeInUp animation-delay-200" style="opacity:0;">

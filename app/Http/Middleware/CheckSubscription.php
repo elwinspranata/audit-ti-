@@ -18,19 +18,13 @@ class CheckSubscription
         $user = $request->user();
 
         if ($user && $user->role !== 'admin') {
-            \Illuminate\Support\Facades\Log::info('CheckSubscription Debug:', [
-                'user_id' => $user->id,
-                'status' => $user->subscription_status,
-                'end_date' => $user->subscription_end,
-                'is_active' => $user->hasActiveSubscription(),
-                'now' => now()->toDateTimeString(),
-            ]);
-            
             if (!$user->hasActiveSubscription()) {
-                return redirect()->route('pricing.index')->with('error', 'Anda harus berlangganan paket untuk mengakses halaman ini.');
+                return redirect()->route('pricing.index')
+                    ->with('error', 'Anda harus berlangganan paket untuk mengakses halaman ini.');
             }
         }
 
         return $next($request);
     }
 }
+

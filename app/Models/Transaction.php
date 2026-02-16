@@ -12,8 +12,10 @@ class Transaction extends Model
     protected $fillable = [
         'user_id',
         'package_id',
+        'coupon_id',
         'transaction_code',
         'amount',
+        'discount_amount',
         'payment_status',
         'admin_status',
         'payment_method',
@@ -29,5 +31,15 @@ class Transaction extends Model
     public function package()
     {
         return $this->belongsTo(Package::class);
+    }
+
+    public function coupon()
+    {
+        return $this->belongsTo(Coupon::class);
+    }
+
+    public function assessment()
+    {
+        return $this->hasOne(Assessment::class);
     }
 }

@@ -37,46 +37,65 @@ class Level extends Model
 
     // --- HELPER METHOD (SUDAH BENAR) ---
 
-    public function isCompletedByUser($user)
+    public function isCompletedByUser($user, $assessmentId = null)
     {
         if (!$user) return false;
-        $answeredCount = $this->jawabans()->where('user_id', $user->id)->count();
+        $query = $this->jawabans()->where('user_id', $user->id);
+        if ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        }
+        $answeredCount = $query->count();
         return $answeredCount > 0 && $answeredCount >= $this->quisioners()->count();
     }
 
-    public function isFullyAchievedByUser($user, $startDate = null, $endDate = null)
+    public function isFullyAchievedByUser($user, $startDate = null, $endDate = null, $assessmentId = null)
     {
         if (!$user) {
             return false;
         }
 
-        $query = $this->jawabans()->where('user_id', $user->id)->where('jawaban', 'F');
+        // In COBIT, a level is achieved if all answers are 'F' (Fully) or 'L' (Largely).
+        $query = $this->jawabans()->where('user_id', $user->id)->whereIn('jawaban', ['F', 'L']);
+
+        if ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        }
 
         if ($startDate && $endDate) {
             $query->whereBetween('created_at', [$startDate, $endDate]);
         }
 
-        $fullyAchievedCount = $query->count();
+        $achievedCount = $query->count();
+        $totalCount = $this->quisioners()->count();
         
-        // Ensure we compare against total questions (assuming total questions is static)
-        return $fullyAchievedCount === $this->quisioners()->count() && $fullyAchievedCount > 0;
+        return $achievedCount === $totalCount && $totalCount > 0;
     }
 
-    public function hasActiveResubmissionRequest($user)
+    public function hasActiveResubmissionRequest($user, $assessmentId = null)
     {
         if (!$user) return false;
-        return $this->resubmissionRequests()
+        $query = $this->resubmissionRequests()
             ->where('user_id', $user->id)
-            ->whereIn('status', ['pending', 'approved'])
-            ->exists();
+            ->whereIn('status', ['pending', 'approved']);
+            
+        if ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        }
+
+        return $query->exists();
     }
 
-    public function isApprovedForResubmission($user)
+    public function isApprovedForResubmission($user, $assessmentId = null)
     {
         if (!$user) return false;
-        return $this->resubmissionRequests()
+        $query = $this->resubmissionRequests()
             ->where('user_id', $user->id)
-            ->where('status', 'approved')
-            ->exists();
+            ->where('status', 'approved');
+            
+        if ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        }
+
+        return $query->exists();
     }
 }

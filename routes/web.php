@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\UserApprovalController;
+use App\Http\Controllers\Admin\AdminCouponController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
@@ -25,6 +26,7 @@ use App\Mail\NewUserForApproval;
 use Illuminate\Support\Facades\Mail;
 
 // ================= MAIN ROUTES ====================
+
 
 Route::get('/', function () {
     return view('auth/login');
@@ -148,6 +150,13 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.assessments.approve');
     Route::post('/admin/assessments/{assessment}/reject', [\App\Http\Controllers\Admin\AdminAssessmentController::class, 'reject'])
         ->name('admin.assessments.reject');
+    Route::get('/admin/transactions/{transaction}/eligible-items', [\App\Http\Controllers\Admin\AdminAssessmentController::class, 'getEligibleItems'])
+        ->name('admin.transactions.eligible-items');
+
+    // Coupon Management
+    Route::resource('coupons', AdminCouponController::class)->names('admin.coupons');
+    Route::patch('coupons/{coupon}/toggle', [AdminCouponController::class, 'toggleStatus'])
+        ->name('admin.coupons.toggle');
 
 });
 
@@ -160,9 +169,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         return view('user.dashboard');
     })->name('user.dashboard');
 
-    Route::post('/levels/{level}/request-resubmission', 
-        [ResubmissionRequestController::class, 'store'])
-        ->name('resubmission.request');
+
 
 
     // ================= PAYMENT ROUTES (USER) ================
@@ -190,17 +197,22 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     Route::post('/midtrans/callback', [PaymentController::class, 'callback'])
         ->name('midtrans.callback');
 
+    // Apply Coupon
+    Route::post('/payment/{transaction}/apply-coupon', [PaymentController::class, 'applyCoupon'])
+        ->name('payment.apply-coupon');
+
     // ========================================================
 
 
     // Audit (protected by check.subscription)
     Route::middleware(['check.subscription'])->group(function() {
-         Route::get('/audit', [AuditController::class, 'index'])->name('audit.index');
-         Route::get('/audit/{cobitItem}', [AuditController::class, 'showCategories'])->name('audit.showCategories');
-         Route::get('/audit/{cobitItem}/{kategori}', [AuditController::class, 'showLevels'])->name('audit.showLevels');
-         Route::get('/audit/{cobitItem}/{kategori}/{level}', [AuditController::class, 'showQuisioner'])->name('audit.showQuisioner');
-         Route::post('/audit/{level}/jawaban', [JawabanController::class, 'store'])->name('jawaban.store');
-         Route::post('/audit/{level}/draft', [JawabanController::class, 'saveDraft'])->name('jawaban.saveDraft');
+         Route::get('/audit/{assessment}', [AuditController::class, 'index'])->name('audit.index');
+         Route::get('/audit/{assessment}/{cobitItem}', [AuditController::class, 'showCategories'])->name('audit.showCategories');
+         Route::get('/audit/{assessment}/{cobitItem}/{kategori}', [AuditController::class, 'showLevels'])->name('audit.showLevels');
+         Route::get('/audit/{assessment}/{cobitItem}/{kategori}/{level}', [AuditController::class, 'showQuisioner'])->name('audit.showQuisioner');
+         Route::post('/audit/{assessment}/{level}/jawaban', [JawabanController::class, 'store'])->name('jawaban.store');
+         Route::post('/audit/{assessment}/{level}/draft', [JawabanController::class, 'saveDraft'])->name('jawaban.saveDraft');
+         Route::post('/audit/{assessment}/levels/{level}/request-resubmission', [ResubmissionRequestController::class, 'store'])->name('resubmission.request');
     });
 
     // User Progress
@@ -220,6 +232,10 @@ Route::middleware(['auth', 'role:user'])->group(function () {
         ->name('user.assessments.start');
     Route::post('/my-assessments/{assessment}/complete', [\App\Http\Controllers\UserAssessmentController::class, 'complete'])
         ->name('user.assessments.complete');
+
+    // User view final audit report
+    Route::get('/my-assessments/{assessment}/report', [\App\Http\Controllers\AuditReportController::class, 'showForUser'])
+        ->name('user.assessments.report');
 });
 
 
@@ -239,6 +255,28 @@ Route::middleware(['auth', 'role:auditor'])->group(function () {
         ->name('auditor.complete');
     Route::get('/auditor/evidence/{jawaban}', [\App\Http\Controllers\AuditorController::class, 'viewEvidence'])
         ->name('auditor.evidence');
+
+    // Audit Report routes
+    Route::get('/auditor/assessments/{assessment}/report/create', [\App\Http\Controllers\AuditReportController::class, 'create'])
+        ->name('auditor.report.create');
+    Route::post('/auditor/assessments/{assessment}/report', [\App\Http\Controllers\AuditReportController::class, 'store'])
+        ->name('auditor.report.store');
+    Route::get('/auditor/reports/{report}', [\App\Http\Controllers\AuditReportController::class, 'show'])
+        ->name('auditor.report.show');
+    Route::get('/auditor/reports/{report}/edit', [\App\Http\Controllers\AuditReportController::class, 'edit'])
+        ->name('auditor.report.edit');
+    Route::put('/auditor/reports/{report}', [\App\Http\Controllers\AuditReportController::class, 'update'])
+        ->name('auditor.report.update');
+    Route::post('/auditor/reports/{report}/finalize', [\App\Http\Controllers\AuditReportController::class, 'finalize'])
+        ->name('auditor.report.finalize');
+});
+
+// Audit Report Export Routes (Accessible by both Auditors and Users)
+Route::middleware(['auth'])->group(function () {
+    Route::get('/reports/{report}/pdf', [\App\Http\Controllers\AuditReportController::class, 'exportPdf'])
+        ->name('auditor.report.pdf');
+    Route::get('/reports/{report}/excel', [\App\Http\Controllers\AuditReportController::class, 'exportExcel'])
+        ->name('auditor.report.excel');
 });
 
 

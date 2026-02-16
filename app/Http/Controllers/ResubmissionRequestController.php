@@ -11,23 +11,26 @@ use Illuminate\Support\Facades\Auth;
 class ResubmissionRequestController extends Controller
 {
     // Method yang sudah ada untuk user mengajukan request
-    public function store(Request $request, Level $level)
+    public function store(Request $request, $assessmentId, Level $level)
     {
         $userId = Auth::id();
         $existingRequest = ResubmissionRequest::where('user_id', $userId)
+            ->where('assessment_id', $assessmentId)
             ->where('level_id', $level->id)
             ->whereIn('status', ['pending', 'approved'])
             ->first();
 
         if ($existingRequest) {
-            return back()->with('error', 'Anda sudah memiliki permintaan aktif untuk mengisi ulang level ini.');
+            return back()->with('error', 'Anda sudah memiliki permintaan aktif untuk mengisi ulang level ini pada assessment ini.');
         }
 
         try {
             ResubmissionRequest::create([
                 'user_id' => $userId,
+                'assessment_id' => $assessmentId,
                 'level_id' => $level->id,
                 'status' => 'pending',
+                'requested_at' => now(),
             ]);
             return back()->with('success', 'Permintaan pengisian ulang telah diajukan dan menunggu persetujuan admin.');
         } catch (\Illuminate\Database\QueryException $e) {

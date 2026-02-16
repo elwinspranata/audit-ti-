@@ -29,7 +29,13 @@
                                 </div>
                                 <div class="grid grid-cols-3 gap-4">
                                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Tagihan</div>
-                                    <div class="col-span-2 text-sm font-bold text-blue-600 dark:text-blue-400">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</div>
+                                    <div class="col-span-2">
+                                        @if($transaction->discount_amount > 0)
+                                            <div class="text-xs line-through text-gray-500 mb-1">Rp {{ number_format($transaction->package->price, 0, ',', '.') }}</div>
+                                            <div class="text-xs text-green-600 dark:text-green-400 font-semibold mb-1">- Rp {{ number_format($transaction->discount_amount, 0, ',', '.') }} ({{ $transaction->coupon->code }})</div>
+                                        @endif
+                                        <div class="text-sm font-bold text-blue-600 dark:text-blue-400">Rp {{ number_format($transaction->amount, 0, ',', '.') }}</div>
+                                    </div>
                                 </div>
                                 <div class="grid grid-cols-3 gap-4">
                                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">Status Midtrans</div>

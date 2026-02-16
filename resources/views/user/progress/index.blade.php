@@ -229,7 +229,7 @@
                                     Halo, {{ $user->name }}! 👋
                                 </h1>
                                 <p class="mt-3 text-lg text-gray-600 dark:text-gray-300">
-                                    Pantau progres pengerjaan kuesioner Anda dengan mudah dan detail
+                                    Pantau progres pengerjaan assessment Anda dengan mudah dan detail
                                 </p>
                                 <div class="flex items-center mt-4 space-x-4">
                                     <div
@@ -298,7 +298,7 @@
                                             $kategori = $draft->level->kategori ?? null;
                                         @endphp
                                         @if($cobitItem && $kategori)
-                                        <a href="{{ route('audit.showQuisioner', [$cobitItem->id, $kategori->id, $draft->level_id]) }}" 
+                                        <a href="{{ route('audit.showQuisioner', ['assessment' => $draft->assessment_id, 'cobitItem' => $cobitItem->id, 'kategori' => $kategori->id, 'level' => $draft->level_id]) }}" 
                                            class="flex items-center justify-between p-3 transition-all duration-200 bg-white border rounded-lg shadow-sm dark:bg-gray-800 border-amber-200 dark:border-amber-700/50 hover:shadow-md hover:scale-[1.01] group">
                                             <div class="flex items-center space-x-3">
                                                 <div class="flex items-center justify-center w-8 h-8 text-sm font-bold text-white rounded-lg bg-gradient-to-br from-amber-400 to-orange-500">
@@ -342,7 +342,7 @@
                         </div>
                         <h3 class="mb-3 text-2xl font-bold text-gray-900 dark:text-white">Belum Ada Data</h3>
                         <p class="text-lg text-gray-500 dark:text-gray-400">
-                            Progres kuesioner belum tersedia. Mulai mengerjakan kuesioner untuk melihat progres Anda!
+                            Progres assessment belum tersedia. Mulai mengerjakan kuesioner untuk melihat progres Anda!
                         </p>
                         <div class="mt-6">
                             <a href="#"

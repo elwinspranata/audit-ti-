@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Jawaban;
 
 class AssessmentItem extends Model
 {
@@ -68,6 +69,70 @@ class AssessmentItem extends Model
         }
 
         return (int) round(($answeredQuestions / $totalQuestions) * 100);
+    }
+
+    /**
+     * Check if this item has any answers needing revision
+     */
+    public function hasNeedsRevision(): bool
+    {
+        return Jawaban::where('assessment_id', $this->assessment_id)
+            ->whereIn('level_id', $this->cobitItem->kategoris->flatMap(function($k) {
+                return $k->levels;
+            })->pluck('id'))
+            ->where('verification_status', 'needs_revision')
+            ->exists();
+    }
+
+    /**
+     * Get progress attribute
+     */
+    public function getProgressAttribute(): int
+    {
+        return $this->progress_percentage;
+    }
+
+    /**
+     * Hitung level maturitas (0-5) untuk item ini
+     */
+    public function calculateMaturityLevel(): int
+    {
+        $assessment = $this->assessment;
+        $cobitItem = $this->cobitItem;
+
+        if (!$assessment || !$cobitItem) {
+            return 0;
+        }
+
+        $allLevels = [];
+        foreach ($cobitItem->kategoris as $kategori) {
+            foreach ($kategori->levels as $level) {
+                // Extract level number from name (e.g. "Level 3" -> 3)
+                $lvlNum = (int) filter_var($level->nama_level, FILTER_SANITIZE_NUMBER_INT);
+                if ($lvlNum === 0) continue;
+
+                $questionCount = $level->quisioners->count();
+                $answeredCount = $assessment->jawabans()
+                    ->where('level_id', $level->id)
+                    ->count();
+                
+                $isCompleted = ($questionCount > 0 && $answeredCount >= $questionCount);
+                
+                if (!isset($allLevels[$lvlNum])) $allLevels[$lvlNum] = true;
+                if (!$isCompleted) $allLevels[$lvlNum] = false;
+            }
+        }
+
+        $maturityLevel = 0;
+        for ($i = 1; $i <= 5; $i++) {
+            if (isset($allLevels[$i]) && $allLevels[$i] === true) {
+                $maturityLevel = $i;
+            } else {
+                break;
+            }
+        }
+
+        return $maturityLevel;
     }
 
     /**

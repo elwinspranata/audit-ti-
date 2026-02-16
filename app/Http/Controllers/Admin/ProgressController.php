@@ -34,8 +34,10 @@ class ProgressController extends Controller
         // Ini tidak memanggil service yang berat agar halaman list tetap cepat.
         foreach ($users as $user) {
             if ($totalQuestions > 0) {
-                $answeredQuestions = Jawaban::where('user_id', $user->id)->count();
-                $user->progress = ($answeredQuestions / $totalQuestions) * 100;
+                $answeredQuestions = Jawaban::where('user_id', $user->id)
+                    ->distinct('quisioner_id')
+                    ->count('quisioner_id');
+                $user->progress = min(100, ($answeredQuestions / $totalQuestions) * 100);
             } else {
                 $user->progress = 0;
             }

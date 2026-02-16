@@ -92,6 +92,13 @@ class User extends Authenticatable
         return $this->belongsTo(Package::class, 'active_package_id');
     }
 
+    public function paidTransactionsWithoutAssessment()
+    {
+        return $this->transactions()
+            ->where('payment_status', 'paid')
+            ->where('admin_status', 'approved')
+            ->whereDoesntHave('assessment');
+    }
     /**
      * Get assessment aktif user (hanya 1 yang boleh aktif)
      */

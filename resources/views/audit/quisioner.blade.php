@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold leading-tight text-gray-700 dark:text-sky-300">
-                {{ __('Jawab Kuesioner - Level: ') . ($level->nama_level ?? 'Belum Ditentukan') }}
+                {{ __('Kuesioner Assessment - Level: ') . ($level->nama_level ?? 'Belum Ditentukan') }}
             </h2>
             <div class="text-sm text-gray-500 dark:text-gray-400">
                 <span id="progress-text">0 / {{ $quisioners->count() }} Pertanyaan</span>
@@ -326,10 +326,10 @@
             <div class="mb-8 animate-fadeIn">
                 @include('audit.partials.breadcrumbs', [
                     'breadcrumbs' => [
-                        ['title' => $cobitItem->nama_item, 'url' => route('audit.showCategories', $cobitItem->id)],
+                        ['title' => $cobitItem->nama_item, 'url' => route('audit.showCategories', ['assessment' => $assessment->id, 'cobitItem' => $cobitItem->id])],
                         [
                             'title' => $kategori->nama,
-                            'url' => route('audit.showLevels', [$cobitItem->id, $kategori->id]),
+                            'url' => route('audit.showLevels', ['assessment' => $assessment->id, 'cobitItem' => $cobitItem->id, 'kategori' => $kategori->id]),
                         ],
                         ['title' => $level->nama_level],
                     ],
@@ -368,7 +368,7 @@
                     </div>
                 @endif
 
-                <form id="quisionerForm" action="{{ route('jawaban.store', $level->id) }}" method="POST">
+                <form id="quisionerForm" action="{{ route('jawaban.store', ['assessment' => $assessment->id, 'level' => $level->id]) }}" method="POST">
                     @csrf
                     <input type="hidden" name="user_confirmation" id="user_confirmation_input" value="tidak_setuju">
 
@@ -380,14 +380,24 @@
                                 <div class="flex-1">
                                     <div class="flex items-center mb-3">
                                         <span
-                                            class="inline-flex items-center justify-center w-8 h-8 mr-3 text-sm font-bold text-white bg-blue-500 rounded-full">
+                                            class="inline-flex items-center justify-center w-8 h-8 mr-3 text-sm font-bold text-white {{ isset($existingAnswers[$quisioner->id]) && $existingAnswers[$quisioner->id]->verification_status === 'needs_revision' ? 'bg-red-500' : 'bg-blue-500' }} rounded-full">
                                             {{ $loop->iteration }}
                                         </span>
                                         <h3 class="text-lg font-semibold text-gray-800 dark:text-sky-200">
                                             {{ $quisioner->pertanyaan }}
                                             <span class="ml-1 text-red-500">*</span>
                                         </h3>
+                                        @if(isset($existingAnswers[$quisioner->id]) && $existingAnswers[$quisioner->id]->verification_status === 'needs_revision')
+                                            <span class="ml-3 px-2 py-0.5 text-[10px] font-bold text-white bg-red-600 rounded uppercase tracking-wider animate-pulse">Perlu Revisi</span>
+                                        @endif
                                     </div>
+
+                                    @if(isset($existingAnswers[$quisioner->id]) && $existingAnswers[$quisioner->id]->verification_status === 'needs_revision' && $existingAnswers[$quisioner->id]->auditor_evidence)
+                                        <div class="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 rounded-r-lg">
+                                            <p class="text-xs font-bold text-red-700 dark:text-red-400 mb-1">INSTRUKSI REVISI:</p>
+                                            <p class="text-sm text-red-600 dark:text-red-300 italic">"{{ $existingAnswers[$quisioner->id]->auditor_evidence }}"</p>
+                                        </div>
+                                    @endif
                                 </div>
                                 <div class="hidden completion-indicator" id="indicator-{{ $quisioner->id }}">
                                     <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
@@ -406,7 +416,12 @@
                                 {{-- Radio buttons for options --}}
                                 @foreach (['N', 'P', 'L', 'F'] as $option)
                                     @php
-                                        $isSelected = isset($draftAnswers[$quisioner->id]) && $draftAnswers[$quisioner->id] === $option;
+                                        $isSelected = false;
+                                        if (isset($draftAnswers[$quisioner->id])) {
+                                            $isSelected = $draftAnswers[$quisioner->id] === $option;
+                                        } elseif (isset($existingAnswers[$quisioner->id])) {
+                                            $isSelected = $existingAnswers[$quisioner->id]->jawaban === $option;
+                                        }
                                     @endphp
                                     <label class="option-button {{ $isSelected ? 'selected' : '' }}" data-option="{{ $option }}">
                                         <input type="radio" name="jawaban[{{ $quisioner->id }}]"
@@ -461,7 +476,7 @@
                                 {{-- Grup Tombol Aksi --}}
                                 <div class="flex flex-wrap items-center justify-center gap-3 w-full sm:w-auto sm:justify-end">
                                     {{-- Tombol Kembali --}}
-                                    <a href="{{ route('audit.showLevels', [$cobitItem->id, $kategori->id]) }}"
+                                    <a href="{{ route('audit.showLevels', ['assessment' => $assessment->id, 'cobitItem' => $cobitItem->id, 'kategori' => $kategori->id]) }}"
                                         class="inline-flex items-center justify-center px-5 py-3 text-sm font-semibold text-center text-gray-700 transition-all duration-200 bg-white border border-gray-300 shadow-sm rounded-xl dark:bg-slate-800 dark:border-slate-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-slate-700">
                                         <svg class="w-4 h-4 mr-2" xmlns="http://www.w3.org/2000/svg"
                                             fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
@@ -552,6 +567,7 @@
             const draftStatus = document.getElementById('draft-status');
             const draftStatusText = document.getElementById('draft-status-text');
             const totalQuestions = {{ $quisioners->count() }};
+            const assessmentId = {{ $assessment->id }};
             const levelId = {{ $level->id }};
             const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
@@ -596,7 +612,7 @@
                 }
 
                 try {
-                    const response = await fetch(`/audit/${levelId}/draft`, {
+                    const response = await fetch(`/audit/${assessmentId}/${levelId}/draft`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

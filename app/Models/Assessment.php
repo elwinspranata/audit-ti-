@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class Assessment extends Model
 {
@@ -11,16 +13,21 @@ class Assessment extends Model
 
     protected $fillable = [
         'user_id',
+        'package_id',
+        'transaction_id',
         'name',
+        'description',
         'status',
         'admin_notes',
         'rejection_reason',
-        'approved_by',
+        'submitted_at',
         'approved_at',
+        'approved_by',
+        'completed_at',
+        'assigned_auditor_id',
+        'assigned_at',
         'verified_by',
         'verified_at',
-        'submitted_at',
-        'completed_at',
     ];
 
     protected $casts = [
@@ -28,6 +35,7 @@ class Assessment extends Model
         'verified_at' => 'datetime',
         'submitted_at' => 'datetime',
         'completed_at' => 'datetime',
+        'assigned_at' => 'datetime',
     ];
 
     /**
@@ -89,6 +97,51 @@ class Assessment extends Model
     public function verifier()
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    /**
+     * Relasi ke Auditor yang ditugaskan
+     */
+    public function assignedAuditor()
+    {
+        return $this->belongsTo(User::class, 'assigned_auditor_id');
+    }
+
+    /**
+     * Relasi ke Audit Report
+     */
+    public function auditReport()
+    {
+        return $this->hasOne(AuditReport::class);
+    }
+
+    /**
+     * Relasi ke Package (jika bersumber dari pembelian paket)
+     */
+    public function package()
+    {
+        return $this->belongsTo(Package::class);
+    }
+
+    public function transaction()
+    {
+        return $this->belongsTo(Transaction::class);
+    }
+
+    /**
+     * Check if there are any answers that need revision
+     */
+    public function hasNeedsRevision(): bool
+    {
+        return $this->jawabans()->where('verification_status', 'needs_revision')->exists();
+    }
+
+    /**
+     * Check apakah assessment ditugaskan ke user tertentu
+     */
+    public function isAssignedTo($userId): bool
+    {
+        return $this->assigned_auditor_id === $userId;
     }
 
     /**
@@ -193,10 +246,61 @@ class Assessment extends Model
     }
 
     /**
+     * Get source label (Paket vs Manual)
+     */
+    public function getSourceLabelAttribute(): string
+    {
+        return $this->package_id ? 'Paket: ' . ($this->package->name ?? 'Premium') : 'Penugasan Langsung';
+    }
+
+    /**
      * Get progress percentage as attribute
      */
     public function getProgressAttribute(): int
     {
         return $this->calculateProgress();
+    }
+
+    /**
+     * Create a new assessment for a user based on a package.
+     */
+    public static function createForUser(User $user, Package $package)
+    {
+        DB::beginTransaction();
+        try {
+            $assessment = self::create([
+                'user_id' => $user->id,
+                'package_id' => $package->id,
+                'name' => 'Audit ' . $package->name . ' - ' . now()->format('d M Y'),
+                'status' => self::STATUS_APPROVED,
+                'submitted_at' => now(),
+                'approved_at' => now(),
+                'approved_by' => auth()->id() ?? User::where('role', 'admin')->first()->id,
+            ]);
+
+            // Get CobitItems based on package level
+            $cobitItems = CobitItem::where('is_visible', true)
+                ->where('required_level', '<=', $package->level)
+                ->get();
+
+            foreach ($cobitItems as $item) {
+                AssessmentItem::create([
+                    'assessment_id' => $assessment->id,
+                    'cobit_item_id' => $item->id,
+                ]);
+            }
+
+            DB::commit();
+            Log::info('Assessment auto-created for user', ['user_id' => $user->id, 'assessment_id' => $assessment->id]);
+            return $assessment;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Failed to auto-create assessment', [
+                'user_id' => $user->id,
+                'package_id' => $package->id,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 }

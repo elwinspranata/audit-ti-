@@ -5,7 +5,7 @@
                 {{ __('Pilih Paket Layanan') }}
             </h2>
             <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                Silakan pilih paket berlangganan untuk mengakses sistem audit TI.
+                Silakan pilih paket berlangganan untuk mengakses sistem assessment TI.
             </p>
         </div>
     </x-slot>

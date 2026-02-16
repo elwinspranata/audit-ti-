@@ -24,8 +24,10 @@ class ReportController extends Controller
         $usersForTable = User::where('role', '!=', 'admin')->paginate(10);
         foreach ($usersForTable as $u) {
             if ($totalQuestions > 0) {
-                $answeredQuestions = \App\Models\Jawaban::where('user_id', $u->id)->count();
-                $u->progress = ($answeredQuestions / $totalQuestions) * 100;
+                $answeredQuestions = \App\Models\Jawaban::where('user_id', $u->id)
+                    ->distinct('quisioner_id')
+                    ->count('quisioner_id');
+                $u->progress = min(100, ($answeredQuestions / $totalQuestions) * 100);
             } else {
                 $u->progress = 0;
             }

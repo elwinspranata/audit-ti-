@@ -14,12 +14,16 @@ class UserProgressService
      * @param User $user
      * @return \Illuminate\Support\Collection
      */
-    public function getProgressData(User $user)
+    public function getProgressData(User $user, $assessmentId = null)
     {
         // Ambil semua jawaban pengguna dan kelompokkan berdasarkan level_id
-        $userAnswersByLevel = Jawaban::where('user_id', $user->id)
-            ->get()
-            ->groupBy('level_id');
+        $query = Jawaban::where('user_id', $user->id);
+
+        if ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        }
+
+        $userAnswersByLevel = $query->get()->groupBy('level_id');
 
         // Ambil semua Cobit Item yang relevan dengan relasi yang dibutuhkan
         $cobitItems = CobitItem::with(['kategoris.levels.quisioners'])

@@ -78,6 +78,27 @@
                         @enderror
                     </div>
 
+                    {{-- Status Reset (Conditional) --}}
+                    @if(in_array($assessment->status, ['completed', 'verified']))
+                    <div class="p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-xl">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1">
+                                <input type="checkbox" name="reset_status" id="reset_status" value="1" checked
+                                    class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <label for="reset_status" class="font-bold text-amber-800 dark:text-amber-400 block mb-1">
+                                    Buka Kembali Pengerjaan
+                                </label>
+                                <p class="text-sm text-amber-700 dark:text-amber-500">
+                                    Assessment ini sudah berstatus <strong>{{ $assessment->status_label }}</strong>. 
+                                    Mencentang ini akan mengubah status kembali ke <strong>Sedang Dikerjakan</strong> agar user bisa mengisi proses baru yang Anda tambahkan.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
+
                     {{-- COBIT Items Selection --}}
                     <div>
                         <div class="flex items-center justify-between mb-4">

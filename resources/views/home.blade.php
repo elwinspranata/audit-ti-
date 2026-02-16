@@ -73,17 +73,17 @@
         <div class="z-10 w-full max-w-screen-xl px-4 py-24 mx-auto text-center lg:py-56">
             <h1
                 class="mb-6 text-4xl font-extrabold leading-tight tracking-tight text-transparent md:text-5xl lg:text-7xl bg-clip-text bg-gradient-to-r from-sky-300 via-cyan-300 to-purple-400 animate-fadeInDown drop-shadow-lg">
-                Kami Mengoptimalkan Audit Proses TI untuk Masa Depan yang Lebih Aman
+                Kami Mengoptimalkan Assessment Proses TI untuk Masa Depan yang Lebih Aman
             </h1>
             <p
                 class="mb-10 text-lg font-normal text-gray-300 lg:text-xl sm:px-16 lg:px-48 animate-fadeInUp animation-delay-300">
-                Di sini, kami fokus pada audit dan pengawasan proses teknologi informasi yang dapat meningkatkan
+                Di sini, kami fokus pada assessment dan pengawasan proses teknologi informasi yang dapat meningkatkan
                 keamanan, efisiensi, dan kepatuhan untuk mendukung pertumbuhan bisnis jangka panjang.
             </p>
 
             <div
                 class="flex flex-col space-y-4 sm:flex-row sm:justify-center sm:space-y-0 animate-fadeInUp animation-delay-600">
-                <a href="{{ route('audit.index') }}"
+                <a href="{{ route('user.assessments.index') }}"
                     class="group relative inline-flex items-center justify-center px-6 py-3.5 text-base font-bold text-center text-white
                           rounded-lg transition-all duration-500 ease-in-out
                           bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-700

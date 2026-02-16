@@ -57,9 +57,7 @@
                                 <a href="{{ route('admin.report.export', ['user_id' => $selectedUser->id, 'type' => 'excel', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-500 active:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                     Download Excel
                                 </a>
-                                <a href="{{ route('admin.report.export', ['user_id' => $selectedUser->id, 'type' => 'csv', 'start_date' => $startDate, 'end_date' => $endDate]) }}" class="inline-flex items-center px-4 py-2 bg-yellow-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-yellow-500 active:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
-                                    Download CSV
-                                </a>
+
                                 {{-- Tombol Kembali ke Daftar User --}}
                                 <a href="{{ route('admin.report.index') }}" class="inline-flex items-center px-4 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-500 active:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                                     Kembali ke Daftar
@@ -139,66 +137,66 @@
                     @else
                         {{-- TAMPILAN DAFTAR PROGRESS USER (Jika belum pilih user) --}}
                         <div class="border-t border-gray-200 dark:border-gray-700 pt-6 animate-fadeInUp">
-                             <h3 class="mb-2 text-xl font-bold tracking-tight text-gray-800 dark:text-sky-300">
-                                Daftar Progress Audit User
-                            </h3>
-                            <p class="mb-6 text-sm text-gray-600 dark:text-gray-400">
-                                Pilih user untuk melihat Laporan Capability Level atau klik Detail untuk melihat rincian jawaban. Total Pertanyaan: <strong>{{ $totalQuestions }}</strong>.
-                            </p>
+                            <div class="mb-6">
+                                <h3 class="text-2xl font-bold text-gray-800 dark:text-white bg-clip-text text-transparent bg-gradient-to-r from-sky-400 via-sky-300 to-cyan-400">
+                                    Daftar Progress Audit User
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                                    Pilih user untuk melihat Laporan Capability Level atau klik Detail untuk rincian jawaban. Total Pertanyaan: <strong>{{ $totalQuestions }}</strong>
+                                </p>
+                            </div>
 
-                             <div class="overflow-x-auto shadow-lg rounded-xl dark:border dark:border-slate-700/80">
-                                <table class="min-w-full">
-                                    <thead class="dark:bg-slate-700/80">
+                            <div class="bg-white/80 backdrop-blur-md dark:bg-slate-800/80 rounded-2xl border border-gray-100 dark:border-slate-700 shadow-xl overflow-hidden">
+                                <table class="w-full text-sm text-left">
+                                    <thead class="text-xs text-gray-500 uppercase bg-gray-50/50 dark:bg-slate-700/50 dark:text-gray-400 border-b border-gray-100 dark:border-slate-700">
                                         <tr>
-                                            <th scope="col" class="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-500 uppercase border-b-2 dark:text-sky-300 dark:border-slate-600">
-                                                Pengguna
-                                            </th>
-                                            <th scope="col" class="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-500 uppercase border-b-2 dark:text-sky-300 dark:border-slate-600">
-                                                Progress
-                                            </th>
-                                            <th scope="col" class="px-6 py-4 text-xs font-semibold tracking-wider text-left text-gray-500 uppercase border-b-2 dark:text-sky-300 dark:border-slate-600">
-                                                Aksi
-                                            </th>
+                                            <th class="px-6 py-4 font-bold">Pengguna</th>
+                                            <th class="px-6 py-4 font-bold text-center">Progress</th>
+                                            <th class="px-6 py-4 font-bold text-center">Aksi</th>
                                         </tr>
                                     </thead>
-                                    <tbody class="bg-white dark:bg-slate-800">
+                                    <tbody class="divide-y divide-gray-100 dark:divide-slate-700">
                                         @forelse ($usersForTable as $u)
-                                            <tr class="transition-colors duration-150 dark:hover:bg-slate-700/60">
-                                                <td class="px-6 py-4 text-sm text-gray-800 border-b dark:text-sky-100 whitespace-nowrap dark:border-slate-700">
+                                            <tr class="group hover:bg-gray-50/50 dark:hover:bg-slate-900/50 transition-colors duration-200">
+                                                <td class="px-6 py-4 align-middle">
                                                     <div class="flex flex-col">
-                                                        <span class="font-semibold">{{ $u->name }}</span>
+                                                        <span class="font-bold text-gray-900 dark:text-white">{{ $u->name }}</span>
                                                         <span class="text-xs text-gray-500 dark:text-gray-400">{{ $u->email }}</span>
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4 text-sm text-gray-700 border-b dark:text-gray-200 whitespace-nowrap dark:border-slate-700">
-                                                     <div class="flex items-center gap-4">
-                                                        <div class="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5">
-                                                            <div class="bg-gradient-to-r from-sky-500 to-blue-500 h-2.5 rounded-full"
+                                                <td class="px-6 py-4 align-middle">
+                                                    <div class="flex items-center justify-center gap-4">
+                                                        <div class="w-48 bg-gray-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
+                                                            <div class="bg-gradient-to-r from-sky-500 to-blue-500 h-2.5 rounded-full shadow-sm"
                                                                 style="width: {{ round($u->progress) }}%"></div>
                                                         </div>
-                                                        <span class="font-semibold text-sky-300">{{ round($u->progress) }}%</span>
+                                                        <span class="text-sm font-bold text-sky-500 dark:text-sky-400 w-10 text-right">{{ round($u->progress) }}%</span>
                                                     </div>
                                                 </td>
-                                                <td class="px-6 py-4 space-x-2 text-sm font-medium whitespace-nowrap border-b dark:border-slate-700">
-                                                    {{-- Lihat Detail Progress (Ke halaman Progress detail yang lama) --}}
-                                                    <a href="{{ route('admin.progress.show', $u) }}"
-                                                        class="inline-flex items-center px-3 py-1.5 bg-blue-600 text-white rounded-md hover:bg-blue-500 transition-colors duration-150"
-                                                        title="Lihat Detail Jawaban">
-                                                        Detail
-                                                    </a>
-
-                                                    {{-- Lihat Laporan (Set filter user_id ke URL ini) --}}
-                                                    <a href="{{ route('admin.report.index', ['user_id' => $u->id]) }}"
-                                                        class="inline-flex items-center px-3 py-1.5 bg-emerald-600 text-white rounded-md hover:bg-emerald-500 transition-colors duration-150"
-                                                        title="Lihat Laporan Capability">
-                                                        Laporan
-                                                    </a>
+                                                <td class="px-6 py-4 align-middle text-center">
+                                                    <div class="flex justify-center gap-2">
+                                                        <a href="{{ route('admin.progress.show', $u) }}"
+                                                            class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold rounded-lg transition-all transform hover:scale-105 shadow-md shadow-blue-500/20"
+                                                            title="Lihat Detail Jawaban">
+                                                            DETAIL
+                                                        </a>
+                                                        <a href="{{ route('admin.report.index', ['user_id' => $u->id]) }}"
+                                                            class="inline-flex items-center px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold rounded-lg transition-all transform hover:scale-105 shadow-md shadow-emerald-500/20"
+                                                            title="Lihat Laporan Capability">
+                                                            LAPORAN
+                                                        </a>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="3" class="px-6 py-12 text-sm text-center text-gray-500 dark:text-slate-400 whitespace-nowrap">
-                                                    Tidak ada data user.
+                                                <td colspan="3" class="px-6 py-12 text-center text-gray-500 dark:text-slate-400">
+                                                    <div class="flex flex-col items-center">
+                                                        <svg class="w-12 h-12 text-gray-300 dark:text-slate-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/>
+                                                        </svg>
+                                                        <span>Tidak ada data user</span>
+                                                    </div>
                                                 </td>
                                             </tr>
                                         @endforelse

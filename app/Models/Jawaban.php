@@ -20,6 +20,7 @@ class Jawaban extends Model
         'evidence_path',
         'evidence_original_name',
         'auditor_notes',
+        'auditor_evidence',
         'verified_by',
         'verified_at',
     ];

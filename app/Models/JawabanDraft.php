@@ -9,11 +9,19 @@ class JawabanDraft extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'level_id', 'answers'];
+    protected $fillable = ['user_id', 'level_id', 'assessment_id', 'answers'];
 
     protected $casts = [
         'answers' => 'array',
     ];
+
+    /**
+     * Relasi ke Assessment
+     */
+    public function assessment()
+    {
+        return $this->belongsTo(Assessment::class);
+    }
 
     /**
      * Relasi ke User

@@ -4,12 +4,17 @@ namespace App\Http\Controllers;
 
 use App\Models\Package;
 use App\Models\Transaction;
+use App\Models\Coupon;
 use Illuminate\Http\Request;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use App\Models\Assessment;
+use App\Models\AssessmentItem;
+use App\Models\CobitItem;
+use App\Models\User;
 
 class PaymentController extends Controller
 {
@@ -115,12 +120,15 @@ class PaymentController extends Controller
             'item_details' => [
                 [
                     'id' => $package->id,
-                    'price' => (int) $package->price,
+                    'price' => (int) ($transaction->amount),
                     'quantity' => 1,
-                    'name' => $package->name,
+                    'name' => $package->name . ($transaction->discount_amount > 0 ? ' (Discount Applied)' : ''),
                 ],
             ],
             'enabled_payments' => ['credit_card', 'bca_va', 'bni_va', 'bri_va', 'permata_va', 'gopay', 'qris'],
+            'callbacks' => [
+                'finish' => route('user.assessments.index'),
+            ],
         ];
 
         try {
@@ -312,13 +320,15 @@ class PaymentController extends Controller
     // 5. History transaksi user
     public function history()
     {
-        $transactions = Transaction::with('package')
+        $transactions = Transaction::with(['package', 'coupon'])
             ->where('user_id', auth()->id())
             ->latest()
             ->get();
 
         return view('payment.history', compact('transactions'));
     }
+
+
 
     // 6. Verifikasi Admin (manual)
     public function verifyByAdmin($id)
@@ -335,13 +345,12 @@ class PaymentController extends Controller
 
         $transaction->admin_status = 'verified';
         $transaction->save();
+        
+        // Always activate/update subscription on manual verification
+        $transaction->user->activateSubscription($transaction->package);
+        // Assessment::createForUser line removed
 
-        // Aktifkan subscription jika belum aktif
-        if ($transaction->user->subscription_status !== 'active') {
-            $transaction->user->activateSubscription($transaction->package);
-        }
-
-        return back()->with('success', 'Transaksi berhasil diverifikasi dan subscription diaktifkan.');
+        return back()->with('success', 'Transaksi berhasil diverifikasi, subscription diaktifkan.');
     }
 
     // Tambahan: endpoint pay() agar AJAX frontend dapat meminta snap token
@@ -368,5 +377,54 @@ class PaymentController extends Controller
         }
 
         return response()->json(['snap_token' => $snap]);
+    }
+
+    // 7. Apply Coupon
+    public function applyCoupon(Request $request, Transaction $transaction)
+    {
+        $request->validate([
+            'coupon_code' => 'required|string',
+        ]);
+
+        if ($transaction->user_id !== auth()->id()) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        if ($transaction->payment_status !== 'pending') {
+            return response()->json(['message' => 'Transaksi tidak dapat diubah'], 400);
+        }
+
+        $couponCode = strtoupper(trim($request->coupon_code));
+        $coupon = Coupon::where('code', $couponCode)->first();
+
+        if (!$coupon || !$coupon->isValid($transaction->package_id)) {
+            return response()->json(['message' => 'Kode kupon tidak valid atau tidak berlaku untuk paket ini'], 422);
+        }
+
+        // Hitung diskon
+        $package = $transaction->package;
+        $discountAmount = $coupon->calculateDiscount($package->price);
+        $finalAmount = $package->price - $discountAmount;
+
+        // Update transaksi
+        $transaction->update([
+            'coupon_id' => $coupon->id,
+            'discount_amount' => $discountAmount,
+            'amount' => $finalAmount,
+            'snap_token' => null, // Reset snap token agar digenerate ulang
+        ]);
+
+        try {
+            $snapToken = $this->generateSnapToken($transaction, $package, auth()->user());
+            
+            return response()->json([
+                'message' => 'Kupon berhasil digunakan!',
+                'discount_amount' => $discountAmount,
+                'final_amount' => $finalAmount,
+                'snap_token' => $snapToken,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Kupon diterapkan, tapi gagal mengupdate token pembayaran', 'error' => $e->getMessage()], 500);
+        }
     }
 }

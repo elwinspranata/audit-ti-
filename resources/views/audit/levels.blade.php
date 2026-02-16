@@ -92,7 +92,7 @@
             <div class="mb-8 animate-slideIn">
                 @include('audit.partials.breadcrumbs', [
                     'breadcrumbs' => [
-                        ['title' => $cobitItem->nama_item, 'url' => route('audit.showCategories', $cobitItem->id)],
+                        ['title' => $cobitItem->nama_item, 'url' => route('audit.showCategories', ['assessment' => $assessment->id, 'cobitItem' => $cobitItem->id])],
                         ['title' => $kategori->nama],
                     ],
                 ])
@@ -112,7 +112,7 @@
                                 </svg>
                             </div>
                             <div>
-                                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Daftar Level</h1>
+                                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Pilih Level Assessment</h1>
                                 <p class="text-gray-600 dark:text-gray-300">Selesaikan setiap level untuk mencapai
                                     maturity yang diinginkan</p>
                             </div>
@@ -121,8 +121,8 @@
                             @php
                                 $totalLevels = $kategori->levels->count();
                                 $completedLevels = $kategori->levels
-                                    ->filter(function ($level) use ($user) {
-                                        return $level->isFullyAchievedByUser($user);
+                                    ->filter(function ($level) use ($user, $assessment) {
+                                        return $level->isFullyAchievedByUser($user, null, null, $assessment->id);
                                     })
                                     ->count();
                                 $progressPercentage = $totalLevels > 0 ? ($completedLevels / $totalLevels) * 100 : 0;
@@ -193,19 +193,15 @@
                     $user = auth()->user();
                     $previousLevelFullyAchieved = true;
                 @endphp
-                @forelse ($kategori->levels->sortBy('level_number') as $index => $level)
+                @forelse ($levels as $index => $level)
                     @php
                         $delayClass = 'animation-delay-' . (($index % 5) + 1) . '00';
                         $levelNumber = $level->level_number ?? $index + 1;
+                        $isCompleted = $level->hasAnswers;
+                        $isFullyAchieved = $level->hasFAnswer;
                     @endphp
 
-                    @if ($previousLevelFullyAchieved)
-                        @php
-                            $isCompleted = $level->isCompletedByUser($user);
-                            $isFullyAchieved = $isCompleted && $level->isFullyAchievedByUser($user);
-                            $hasActiveRequest = $level->hasActiveResubmissionRequest($user);
-                            $isApprovedForResubmission = $level->isApprovedForResubmission($user);
-                        @endphp
+                    @if ($level->isUnlocked)
 
                         <div
                             class="level-card bg-white/80 dark:bg-slate-800/80 backdrop-blur-lg rounded-2xl p-6 shadow-lg border border-white/20 dark:border-slate-700/50 animate-fadeIn {{ $delayClass }}">
@@ -235,6 +231,17 @@
                                         </svg>
                                         <span
                                             class="text-xs font-medium text-green-700 dark:text-green-300">Selesai</span>
+                                    </div>
+                                @elseif ($level->needsRevision)
+                                    <div
+                                        class="flex items-center px-2 py-1 space-x-1 bg-red-100 rounded-full dark:bg-red-900/30">
+                                        <svg class="w-4 h-4 text-red-600 dark:text-red-400" fill="none"
+                                            stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                        <span class="text-xs font-medium text-red-700 dark:text-red-300">Perlu
+                                            Revisi</span>
                                     </div>
                                 @elseif ($isCompleted && !$isFullyAchieved)
                                     <div
@@ -269,15 +276,21 @@
 
                             {{-- Action Button --}}
                             <div class="mt-auto">
-                                @if (!$isCompleted || $isApprovedForResubmission)
-                                    <a href="{{ route('audit.showQuisioner', ['cobitItem' => $cobitItem->id, 'kategori' => $kategori->id, 'level' => $level->id]) }}"
-                                        class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
+                                @if (!$isCompleted || $level->isApprovedForResubmission || $level->needsRevision)
+                                    <a href="{{ route('audit.showQuisioner', ['assessment' => $assessment->id, 'cobitItem' => $cobitItem->id, 'kategori' => $kategori->id, 'level' => $level->id]) }}"
+                                        class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-gradient-to-r {{ $level->needsRevision ? 'from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700' : 'from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700' }} text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
                                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 5l7 7-7 7" />
                                         </svg>
-                                        {{ $isApprovedForResubmission ? 'Isi Ulang Kuesioner' : 'Mulai Kuesioner' }}
+                                        @if($level->needsRevision)
+                                            Perbaiki Jawaban
+                                        @elseif($level->isApprovedForResubmission)
+                                            Isi Ulang Kuesioner
+                                        @else
+                                            Mulai Kuesioner
+                                        @endif
                                     </a>
                                 @elseif ($isCompleted && $isFullyAchieved)
                                     <div
@@ -290,7 +303,7 @@
                                         Tercapai Penuh
                                     </div>
                                 @elseif ($isCompleted && !$isFullyAchieved)
-                                    @if ($hasActiveRequest)
+                                    @if ($level->pendingRequest)
                                         <div
                                             class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 font-medium rounded-xl">
                                             <svg class="w-4 h-4 mr-2 animate-spin" fill="none"
@@ -301,7 +314,7 @@
                                             Menunggu Persetujuan
                                         </div>
                                     @else
-                                        <form action="{{ route('resubmission.request', $level->id) }}" method="POST"
+                                        <form action="{{ route('resubmission.request', ['assessment' => $assessment->id, 'level' => $level->id]) }}" method="POST"
                                             class="w-full">
                                             @csrf
                                             <button type="submit"
@@ -319,7 +332,6 @@
                                 @endif
                             </div>
                         </div>
-                        @php $previousLevelFullyAchieved = $isFullyAchieved; @endphp
                     @else
                         {{-- Locked Level --}}
                         <div

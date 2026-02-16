@@ -26,31 +26,35 @@
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                                 {{ __('Admin Dashboard') }}
                             </x-nav-link>
+                        @elseif(Auth::user()->role === 'auditor')
+                            {{-- Auditor Navigation --}}
+                            <x-nav-link :href="route('auditor.dashboard')" :active="request()->routeIs('auditor.dashboard')">
+                                {{ __('Dashboard') }}
+                            </x-nav-link>
+                        @else
+                            {{-- Regular User Navigation --}}
+                            <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                                {{ __('Home') }}
+                            </x-nav-link>
+
+
+
+                            <x-nav-link :href="route('user.progress.index')" :active="request()->routeIs('user.progress.*')">
+                                {{ __('Progress') }}
+                            </x-nav-link>
+
+                            <x-nav-link :href="route('user.assessments.index')" :active="request()->routeIs('user.assessments.*')">
+                                {{ __('My Assessments') }}
+                            </x-nav-link>
+
+                            <x-nav-link :href="route('pricing.index')" :active="request()->routeIs('pricing.*')">
+                                {{ __('Pricing') }}
+                            </x-nav-link>
+                            
+                            <x-nav-link :href="route('payment.history')" :active="request()->routeIs('payment.history')">
+                                {{ __('Riwayat Bayar') }}
+                            </x-nav-link>
                         @endif
-
-                        <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                            {{ __('Home') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.*')">
-                            {{ __('Audit') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('user.progress.index')" :active="request()->routeIs('user.progress.*')">
-                            {{ __('Progress') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('user.assessments.index')" :active="request()->routeIs('user.assessments.*')">
-                            {{ __('My Assessments') }}
-                        </x-nav-link>
-
-                        <x-nav-link :href="route('pricing.index')" :active="request()->routeIs('pricing.*')">
-                            {{ __('Pricing') }}
-                        </x-nav-link>
-                        
-                        <x-nav-link :href="route('payment.history')" :active="request()->routeIs('payment.history')">
-                            {{ __('Riwayat Bayar') }}
-                        </x-nav-link>
                     @endauth
                 </div>
             </div>
@@ -110,9 +114,7 @@
                 <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
                     {{ __('Home') }}
                 </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('audit.index')" :active="request()->routeIs('audit.*')">
-                    {{ __('Audit') }}
-                </x-responsive-nav-link>
+
                 <x-responsive-nav-link :href="route('user.progress.index')" :active="request()->routeIs('user.progress.*')">
                     {{ __('Progress') }}
                 </x-responsive-nav-link>

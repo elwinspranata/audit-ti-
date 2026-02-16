@@ -182,14 +182,14 @@
                 <nav class="flex" aria-label="Breadcrumb">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
-                            <a href="{{ route('audit.index') }}"
+                            <a href="{{ route('user.assessments.show', $assessment) }}"
                                 class="inline-flex items-center text-sm font-medium text-gray-700 breadcrumb-item hover:text-blue-600 dark:text-gray-400 dark:hover:text-blue-300">
                                 <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
                                     <path
                                         d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z">
                                     </path>
                                 </svg>
-                                Audit COBIT
+                                Detail Assessment
                             </a>
                         </li>
                         <li>
@@ -226,7 +226,7 @@
                             </div>
                             <div>
                                 <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
-                                    Pilih Kategori Audit
+                                    Pilih Kategori Assessment
                                 </h3>
                                 <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">
                                     Setiap kategori memiliki level yang berbeda untuk dinilai
@@ -241,7 +241,7 @@
                             foreach ($kategoris as $kategori) {
                                 $isCompleted = true;
                                 foreach ($kategori->levels as $level) {
-                                    if (!$level->isFullyAchievedByUser($user)) {
+                                    if (!$level->isFullyAchievedByUser($user, null, null, $assessment->id)) {
                                         $isCompleted = false;
                                         break;
                                     }
@@ -275,7 +275,7 @@
                             $completedLevels = 0;
 
                             foreach ($kategori->levels as $level) {
-                                if ($level->isFullyAchievedByUser($user)) {
+                                if ($level->isFullyAchievedByUser($user, null, null, $assessment->id)) {
                                     $completedLevels++;
                                 }
                             }
@@ -285,7 +285,7 @@
                         @endphp
 
                         <div class="mb-6 animate-fadeIn {{ $delayClass }}">
-                            <a href="{{ route('audit.showLevels', [$cobitItem->id, $kategori->id]) }}"
+                            <a href="{{ route('audit.showLevels', ['assessment' => $assessment->id, 'cobitItem' => $cobitItem->id, 'kategori' => $kategori->id]) }}"
                                 class="block p-6 border border-gray-200 category-card gradient-border bg-gray-50 dark:bg-slate-700/50 rounded-xl dark:border-slate-600 hover:border-transparent dark:hover:border-transparent">
 
                                 <div class="flex items-center justify-between">

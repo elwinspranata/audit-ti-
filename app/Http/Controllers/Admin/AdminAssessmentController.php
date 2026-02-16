@@ -7,6 +7,7 @@ use App\Models\Assessment;
 use App\Models\AssessmentItem;
 use App\Models\CobitItem;
 use App\Models\User;
+use App\Models\Transaction;
 use App\Mail\AssessmentStatusChanged;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,8 +47,9 @@ class AdminAssessmentController extends Controller
 
         $assessments = $query->paginate(12);
         $users = User::where('role', 'user')->get();
+        $auditors = User::where('role', 'auditor')->get();
 
-        return view('admin.assessments.index', compact('assessments', 'users'));
+        return view('admin.assessments.index', compact('assessments', 'users', 'auditors'));
     }
 
     /**
@@ -55,14 +57,14 @@ class AdminAssessmentController extends Controller
      */
     public function create()
     {
-        $cobitItems = CobitItem::where('is_visible', true)
-            ->with('kategoris.levels')
-            ->orderBy('nama_item')
+        // Get paid transactions that don't have an assessment yet
+        $transactions = Transaction::where('payment_status', 'paid')
+            ->where('admin_status', 'approved')
+            ->whereDoesntHave('assessment')
+            ->with(['user', 'package'])
             ->get();
-            
-        $users = User::where('role', 'user')->get();
 
-        return view('admin.assessments.create', compact('cobitItems', 'users'));
+        return view('admin.assessments.create', compact('transactions'));
     }
 
     /**
@@ -71,7 +73,7 @@ class AdminAssessmentController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'user_id' => 'required|exists:users,id',
+            'transaction_id' => 'required|exists:transactions,id',
             'name' => 'nullable|string|max:255',
             'cobit_items' => 'required|array|min:1',
             'cobit_items.*' => 'exists:cobit_items,id',
@@ -80,10 +82,19 @@ class AdminAssessmentController extends Controller
             'cobit_items.min' => 'Pilih minimal satu proses TI.',
         ]);
 
+        $transaction = Transaction::findOrFail($request->transaction_id);
+        
+        // Ensure no assessment for this transaction yet (double check)
+        if ($transaction->assessment) {
+            return back()->with('error', 'Assessment sudah dibuat untuk transaksi ini.');
+        }
+
         // Create assessment
         $assessment = Assessment::create([
-            'user_id' => $request->user_id,
-            'name' => $request->name ?? 'Assessment ' . now()->format('d M Y'),
+            'user_id' => $transaction->user_id,
+            'package_id' => $transaction->package_id,
+            'transaction_id' => $transaction->id,
+            'name' => $request->name ?? 'Audit ' . $transaction->package->name . ' - ' . now()->format('d M Y'),
             'status' => Assessment::STATUS_APPROVED, // Auto-approved because admin created it
             'submitted_at' => now(),
             'approved_at' => now(),
@@ -99,7 +110,7 @@ class AdminAssessmentController extends Controller
         }
 
         return redirect()->route('admin.assessments.index')
-            ->with('success', 'Assessment berhasil dibuat untuk user.');
+            ->with('success', 'Assessment berhasil dibuat untuk transaksi ' . $transaction->transaction_code);
     }
 
     /**
@@ -109,19 +120,23 @@ class AdminAssessmentController extends Controller
     {
         $assessment->load([
             'user',
-            'cobitItems.kategoris.levels.quisioners',
-            'items',
+            'items.cobitItem.kategoris.levels.quisioners',
             'jawabans',
             'approver',
-            'verifier'
+            'verifier',
+            'assignedAuditor',
+            'auditReport'
         ]);
 
         // Calculate progress per item
         foreach ($assessment->items as $item) {
-            $item->progress = $item->calculateProgress();
+            $item->updateProgress();
         }
 
-        return view('admin.assessments.show', compact('assessment'));
+        // Get auditors for assignment dropdown (only when status is completed)
+        $auditors = User::where('role', 'auditor')->get();
+
+        return view('admin.assessments.show', compact('assessment', 'auditors'));
     }
 
     /**
@@ -148,23 +163,32 @@ class AdminAssessmentController extends Controller
             'name' => 'nullable|string|max:255',
             'cobit_items' => 'required|array|min:1',
             'cobit_items.*' => 'exists:cobit_items,id',
+            'reset_status' => 'nullable|boolean',
         ]);
 
-        $assessment->update([
+        $data = [
             'name' => $request->name,
-        ]);
+        ];
+
+        // If reset_status is checked, move status back to in_progress
+        if ($request->reset_status) {
+            $data['status'] = Assessment::STATUS_IN_PROGRESS;
+        }
+
+        $assessment->update($data);
 
         // Sync CobitItems
         $assessment->items()->delete();
         foreach ($request->cobit_items as $cobitItemId) {
-            AssessmentItem::create([
+            $item = AssessmentItem::create([
                 'assessment_id' => $assessment->id,
                 'cobit_item_id' => $cobitItemId,
             ]);
+            $item->updateProgress();
         }
 
         return redirect()->route('admin.assessments.show', $assessment)
-            ->with('success', 'Assessment berhasil diperbarui.');
+            ->with('success', 'Assessment berhasil diperbarui' . ($request->reset_status ? ' dan pengerjaan dibuka kembali.' : '.'));
     }
 
     /**
@@ -242,5 +266,57 @@ class AdminAssessmentController extends Controller
 
         return redirect()->route('admin.assessments.index')
             ->with('success', 'Assessment berhasil dihapus.');
+    }
+
+    /**
+     * Assign an auditor to assessment (only after user completes)
+     */
+    public function assignAuditor(Request $request, Assessment $assessment)
+    {
+        $request->validate([
+            'assigned_auditor_id' => 'required|exists:users,id',
+        ], [
+            'assigned_auditor_id.required' => 'Pilih auditor yang akan ditugaskan.',
+        ]);
+
+        // Verify the selected user is actually an auditor
+        $auditor = User::where('id', $request->assigned_auditor_id)
+            ->where('role', 'auditor')
+            ->first();
+
+        if (!$auditor) {
+            return back()->with('error', 'User yang dipilih bukan auditor.');
+        }
+
+        // Only allow assignment for completed assessments
+        if ($assessment->status !== Assessment::STATUS_COMPLETED) {
+            return back()->with('error', 'Auditor hanya bisa ditugaskan untuk assessment yang sudah selesai dikerjakan user.');
+        }
+
+        $assessment->update([
+            'assigned_auditor_id' => $request->assigned_auditor_id,
+            'assigned_at' => now(),
+        ]);
+
+        return back()->with('success', 'Auditor berhasil ditugaskan ke assessment ini.');
+    }
+
+    /**
+     * Get eligible COBIT items for a transaction based on its package level.
+     */
+    public function getEligibleItems(Transaction $transaction)
+    {
+        $package = $transaction->package;
+        
+        if (!$package) {
+            return response()->json([]);
+        }
+        
+        $cobitItems = CobitItem::where('is_visible', true)
+            ->where('required_level', '<=', $package->level)
+            ->orderBy('nama_item')
+            ->get();
+
+        return response()->json($cobitItems);
     }
 }

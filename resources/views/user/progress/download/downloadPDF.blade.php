@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Laporan Progres Audit - {{ $user->name }}</title>
+    <title>Laporan Progres Assessment - {{ $user->name }}</title>
     {{-- Styling CSS disematkan langsung (inline) untuk kompatibilitas terbaik dengan domPDF --}}
     <style>
         body {
@@ -139,11 +139,11 @@
 <body>
     {{-- Footer dengan nomor halaman otomatis --}}
     <div class="footer">
-        Laporan Progres Kuesioner | Halaman <span class="pagenum"></span>
+        Laporan Progres Assessment | Halaman <span class="pagenum"></span>
     </div>
 
     <div class="container">
-        <h1>Laporan Progres Audit</h1>
+        <h1>Laporan Progres Assessment</h1>
 
         {{-- Informasi Pengguna dan Tanggal Cetak --}}
         <div class="user-info">

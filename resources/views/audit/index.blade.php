@@ -3,10 +3,10 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-3xl font-bold leading-tight tracking-wide text-gray-800 dark:text-white">
-                    {{ __('Audit COBIT') }}
+                    {{ __('Assessment Domain') }}
                 </h2>
                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    Kelola dan pantau progres audit COBIT framework Anda
+                    Kelola dan pantau progres domain assessment Anda
                 </p>
             </div>
             <div class="items-center hidden space-x-4 md:flex">
@@ -193,7 +193,7 @@
                         $user = auth()->user(); // Definisikan user sekali di awal
 
                         foreach ($cobitItems as $item) {
-                            $isItemCompleted = $item->isCompletedByUser($user);
+                            $isItemCompleted = $item->isCompletedByUser($user, $assessment->id);
 
                             if ($isItemCompleted) {
                                 $completedItems++;
@@ -205,7 +205,7 @@
                             if ($totalLevels > 0) {
                                 foreach ($item->kategoris as $kategori) {
                                     foreach ($kategori->levels as $level) {
-                                        if ($level->isFullyAchievedByUser($user)) {
+                                        if ($level->isFullyAchievedByUser($user, null, null, $assessment->id)) {
                                             $completedLevels++;
                                         }
                                     }
@@ -288,7 +288,7 @@
                     {{-- Di DALAM perulangan 'foreach', ganti blok PHP yang ada dengan ini --}}
                     @php
                         $user = auth()->user();
-                        $isCompleted = $item->isCompletedByUser($user);
+                        $isCompleted = $item->isCompletedByUser($user, $assessment->id);
                         $delayClass = 'animation-delay-' . (($index % 6) + 1) . '00';
                         $totalLevels = $item->kategoris->flatMap->levels->count();
                         $completedLevels = 0;
@@ -296,7 +296,7 @@
                         if ($totalLevels > 0) {
                             foreach ($item->kategoris as $kategori) {
                                 foreach ($kategori->levels as $level) {
-                                    if ($level->isFullyAchievedByUser($user)) {
+                                    if ($level->isFullyAchievedByUser($user, null, null, $assessment->id)) {
                                         $completedLevels++;
                                     }
                                 }
@@ -428,12 +428,12 @@
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                         </svg>
-                                        Audit Selesai
+                                        Selesai
                                     </div>
                                 @else
-                                    <a href="{{ route('audit.showCategories', $item->id) }}"
+                                    <a href="{{ route('audit.showCategories', ['assessment' => $assessment->id, 'cobitItem' => $item->id]) }}"
                                         class="flex items-center justify-center w-full px-4 py-3 text-sm font-semibold text-white transition-all duration-200 transform shadow-lg group/btn bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 rounded-xl hover:scale-105 hover:shadow-xl">
-                                        <span>{{ $completedLevels > 0 ? 'Lanjutkan Audit' : 'Mulai Audit' }}</span>
+                                        <span>{{ $completedLevels > 0 ? 'Lanjutkan Assessment' : 'Mulai Assessment' }}</span>
                                         <svg class="w-5 h-5 ml-2 transition-transform duration-200 group-hover/btn:translate-x-1"
                                             fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"

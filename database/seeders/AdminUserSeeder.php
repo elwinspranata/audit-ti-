@@ -28,5 +28,15 @@ class AdminUserSeeder extends Seeder
             'subscription_start' => null,
             'subscription_end' => null,
         ]);
+
+        // Auditor user
+        User::updateOrCreate([
+            'email' => 'auditor@example.com',
+        ], [
+            'name' => 'Auditor',
+            'password' => bcrypt('password'),
+            'role' => 'auditor',
+            'is_approved' => true,
+        ]);
     }
 }

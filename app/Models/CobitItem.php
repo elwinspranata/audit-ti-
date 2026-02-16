@@ -36,9 +36,10 @@ class CobitItem extends Model
      * telah diselesaikan oleh pengguna yang diberikan.
      *
      * @param User $user Pengguna yang akan diperiksa.
+     * @param int|null $assessmentId ID Assessment untuk scoping (opsional).
      * @return bool True jika selesai, false jika belum.
      */
-    public function isCompletedByUser(User $user): bool
+    public function isCompletedByUser(User $user, $assessmentId = null): bool
     {
         // 1. Ambil SEMUA ID level yang DIBUTUHKAN untuk Cobit Item ini.
         $requiredLevelIds = $this->kategoris()
@@ -55,9 +56,14 @@ class CobitItem extends Model
         }
 
         // 2. Ambil SEMUA ID level yang SUDAH DIKERJAKAN oleh user untuk domain ini.
-        $completedLevelIds = $user->jawabans()
-            ->whereIn('level_id', $requiredLevelIds->all())
-            ->pluck('level_id')
+        $query = $user->jawabans()
+            ->whereIn('level_id', $requiredLevelIds->all());
+
+        if ($assessmentId) {
+            $query->where('assessment_id', $assessmentId);
+        }
+
+        $completedLevelIds = $query->pluck('level_id')
             ->unique();
 
         // 3. Bandingkan. Jika tidak ada level yang hilang, berarti selesai.

@@ -6,7 +6,7 @@
                     {{ $assessment->name ?? 'Assessment Detail' }}
                 </h2>
                 <p class="mt-2 text-sm text-gray-600 dark:text-gray-300">
-                    Detail dan progres assessment audit Anda
+                    Detail dan progres kuesioner assessment Anda
                 </p>
             </div>
             <div class="items-center hidden space-x-4 md:flex">
@@ -80,7 +80,17 @@
                     'verified'           => ['label' => 'Terverifikasi', 'bg' => 'bg-purple-100 dark:bg-purple-900/30', 'text' => 'text-purple-700 dark:text-purple-300'],
                     'rejected'           => ['label' => 'Ditolak', 'bg' => 'bg-red-100 dark:bg-red-900/30', 'text' => 'text-red-700 dark:text-red-300'],
                 ];
+                
+                $percentage = $assessment->progress;
                 $currentStatus = $statusConfig[$assessment->status] ?? $statusConfig['pending_submission'];
+                
+                if ($assessment->status === 'in_progress' && $percentage >= 100) {
+                    $currentStatus = [
+                        'label' => 'Siap Selesai',
+                        'bg' => 'bg-green-100 dark:bg-green-900/30',
+                        'text' => 'text-green-700 dark:text-green-300'
+                    ];
+                }
             @endphp
 
             <div class="mb-6 p-6 bg-slate-900/50 border border-slate-700 shadow-xl dark:bg-slate-800/90 glass-effect rounded-2xl animate-slideIn">
@@ -92,6 +102,11 @@
                         <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
                             Dibuat: {{ $assessment->created_at->format('d M Y') }}
+                        </div>
+                        <div class="flex items-center">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ $assessment->package_id ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' }}">
+                                {{ $assessment->source_label }}
+                            </span>
                         </div>
                         @if($assessment->approver)
                             <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
@@ -114,14 +129,33 @@
                                 @csrf
                                 <button type="submit" class="px-6 py-2.5 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl transition-colors flex items-center">
                                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                    Mulai Audit
+                                    Mulai Assessment
                                 </button>
                             </form>
                         @elseif($assessment->status === 'in_progress')
-                            <a href="{{ route('audit.index') }}" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors flex items-center">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                                Lanjutkan Questionnaire
-                            </a>
+                            <div class="flex gap-2">
+                                <a href="#assessment-scope" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors flex items-center">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+                                    Lanjutkan Assessment
+                                </a>
+
+                                @if($assessment->progress >= 100)
+                                    <form action="{{ route('user.assessments.complete', $assessment) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-6 py-2.5 bg-green-600 dark:bg-green-700 text-white font-semibold rounded-full transition-colors flex items-center shadow-lg shadow-green-900/20">
+                                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            Selesaikan Assessment
+                                        </button>
+                                    </form>
+                                @endif
+                            </div>
+                        @elseif($assessment->status === 'completed' || $assessment->status === 'verified')
+                            <div class="px-6 py-2.5 bg-green-600 dark:bg-green-700 text-white font-semibold rounded-full flex items-center shadow-lg shadow-green-900/20">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Assessment Selesai
+                            </div>
                         @endif
                     </div>
                 </div>
@@ -130,10 +164,10 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 
                 <!-- Left: Audit Scope Items -->
-                <div class="lg:col-span-2">
+                <div class="lg:col-span-2" id="assessment-scope">
                     <div class="p-6 bg-slate-900/50 border border-slate-700 shadow-xl dark:bg-slate-800/90 glass-effect rounded-2xl animate-fadeIn">
                         <div class="flex items-center justify-between mb-6">
-                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Audit Scope</h3>
+                            <h3 class="text-lg font-bold text-gray-900 dark:text-white">Assessment Scope</h3>
                             <div class="px-3 py-1 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
                                 <span class="text-sm font-medium text-blue-800 dark:text-blue-200">{{ $assessment->items->count() }} Items</span>
                             </div>
@@ -163,9 +197,16 @@
                                         
                                         <!-- Item Details -->
                                         <div class="flex-1">
-                                            <h4 class="text-base font-bold text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                                                {{ $item->cobitItem->nama_item ?? 'Undefined Process' }}
-                                            </h4>
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <h4 class="text-base font-bold text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                                                    {{ $item->cobitItem->nama_item ?? 'Undefined Process' }}
+                                                </h4>
+                                                @if($item->hasNeedsRevision())
+                                                    <span class="px-2 py-0.5 text-[10px] font-bold text-red-600 bg-red-100 rounded dark:bg-red-900/30 dark:text-red-400 uppercase tracking-wider animate-pulse">
+                                                        Perlu Revisi
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <p class="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
                                                 {{ $item->cobitItem->deskripsi ?? 'No documentation available.' }}
                                             </p>
@@ -177,10 +218,10 @@
                                         </div>
                                         
                                         <!-- Action Button -->
-                                        @if($assessment->status === 'in_progress')
+                                        @if($assessment->status === 'in_progress' || $item->hasNeedsRevision())
                                             <div class="flex items-center">
-                                                <a href="{{ route('audit.showCategories', $item->cobitItem) }}" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-medium rounded-lg transition-all flex items-center">
-                                                    Akses
+                                                <a href="{{ route('audit.showCategories', ['assessment' => $assessment->id, 'cobitItem' => $item->cobitItem]) }}" class="px-4 py-2 {{ $item->hasNeedsRevision() ? 'bg-gradient-to-r from-red-600 to-orange-600' : 'bg-gradient-to-r from-blue-600 to-indigo-600' }} hover:opacity-90 text-white text-sm font-medium rounded-lg transition-all flex items-center shadow-lg">
+                                                    {{ $item->hasNeedsRevision() ? 'Perbaiki' : 'Akses' }}
                                                     <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
                                                 </a>
                                             </div>
@@ -241,7 +282,7 @@
 
                     <!-- Audit Timeline -->
                     <div class="p-6 bg-slate-900/50 border border-slate-700 shadow-xl dark:bg-slate-800/90 glass-effect rounded-2xl animate-fadeIn">
-                        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-6">Audit Timeline</h3>
+                        <h3 class="text-sm font-semibold text-gray-600 dark:text-gray-300 uppercase tracking-wider mb-6">Assessment Timeline</h3>
                         
                         @php
                             $steps = [

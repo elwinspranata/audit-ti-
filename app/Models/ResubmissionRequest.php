@@ -13,6 +13,7 @@ class ResubmissionRequest extends Model
     protected $fillable = [
         'user_id',
         'level_id',
+        'assessment_id',
         'status',
         'requested_at',
         'approved_by',
@@ -24,6 +25,11 @@ class ResubmissionRequest extends Model
         'requested_at' => 'datetime',
         'action_at' => 'datetime',
     ];
+
+    public function assessment()
+    {
+        return $this->belongsTo(Assessment::class);
+    }
 
     public function user()
     {

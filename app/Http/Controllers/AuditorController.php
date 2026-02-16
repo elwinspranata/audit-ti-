@@ -17,29 +17,40 @@ class AuditorController extends Controller
      */
     public function index()
     {
-        // Get assessments that are completed and waiting for verification
-        $pendingVerification = Assessment::with(['user', 'cobitItems'])
+        $auditorId = Auth::id();
+
+        // Get assessments that are completed, and either unassigned or assigned to this auditor
+        $pendingVerification = Assessment::with(['user', 'cobitItems', 'auditReport'])
             ->where('status', Assessment::STATUS_COMPLETED)
-            ->orderBy('completed_at', 'asc')
+            ->where(function($query) use ($auditorId) {
+                $query->where('assigned_auditor_id', $auditorId)
+                      ->orWhereNull('assigned_auditor_id');
+            })
+            ->orderByRaw('COALESCE(assigned_at, created_at) DESC')
             ->paginate(10, ['*'], 'pending');
 
-        // Get recently verified assessments
-        $verified = Assessment::with(['user', 'cobitItems', 'verifier'])
+        // Get recently verified assessments by this auditor
+        $verified = Assessment::with(['user', 'cobitItems', 'verifier', 'auditReport'])
             ->where('status', Assessment::STATUS_VERIFIED)
-            ->where('verified_by', Auth::id())
+            ->where('verified_by', $auditorId)
             ->orderBy('verified_at', 'desc')
             ->take(5)
             ->get();
 
-        // Stats
+        // Stats - unassigned completed or those assigned to this auditor
         $stats = [
-            'pending' => Assessment::where('status', Assessment::STATUS_COMPLETED)->count(),
+            'pending' => Assessment::where('status', Assessment::STATUS_COMPLETED)
+                ->where(function($query) use ($auditorId) {
+                    $query->where('assigned_auditor_id', $auditorId)
+                          ->orWhereNull('assigned_auditor_id');
+                })
+                ->count(),
             'verified_today' => Assessment::where('status', Assessment::STATUS_VERIFIED)
-                ->where('verified_by', Auth::id())
+                ->where('verified_by', $auditorId)
                 ->whereDate('verified_at', today())
                 ->count(),
             'verified_total' => Assessment::where('status', Assessment::STATUS_VERIFIED)
-                ->where('verified_by', Auth::id())
+                ->where('verified_by', $auditorId)
                 ->count(),
         ];
 
@@ -51,6 +62,20 @@ class AuditorController extends Controller
      */
     public function show(Assessment $assessment)
     {
+        // Auto-assign if unassigned and someone tries to verify it
+        if ($assessment->status === Assessment::STATUS_COMPLETED && is_null($assessment->assigned_auditor_id)) {
+            $assessment->update([
+                'assigned_auditor_id' => Auth::id(),
+                'assigned_at' => now(),
+            ]);
+        }
+
+        // Verify this auditor is assigned to this assessment
+        if ($assessment->assigned_auditor_id !== Auth::id()) {
+            return redirect()->route('auditor.dashboard')
+                ->with('error', 'Anda tidak memiliki akses ke assessment ini.');
+        }
+
         if (!in_array($assessment->status, [Assessment::STATUS_COMPLETED, Assessment::STATUS_VERIFIED])) {
             return back()->with('error', 'Assessment ini belum siap untuk diverifikasi.');
         }
@@ -58,47 +83,59 @@ class AuditorController extends Controller
         $assessment->load([
             'user',
             'cobitItems.kategoris.levels.quisioners',
-            'items',
-            'jawabans.quisioner',
+            'jawabans.quisioner.level.kategori.cobitItem',
             'jawabans.level',
             'jawabans.verifier',
+            'auditReport',
         ]);
-
-        // Group jawabans by CobitItem -> Kategori -> Level
-        $groupedJawabans = [];
-        foreach ($assessment->cobitItems as $cobitItem) {
-            $groupedJawabans[$cobitItem->id] = [
-                'cobitItem' => $cobitItem,
-                'kategoris' => [],
-            ];
-
-            foreach ($cobitItem->kategoris as $kategori) {
-                $groupedJawabans[$cobitItem->id]['kategoris'][$kategori->id] = [
-                    'kategori' => $kategori,
-                    'levels' => [],
-                ];
-
-                foreach ($kategori->levels as $level) {
-                    $levelJawabans = $assessment->jawabans
-                        ->where('level_id', $level->id);
-
-                    $groupedJawabans[$cobitItem->id]['kategoris'][$kategori->id]['levels'][$level->id] = [
-                        'level' => $level,
-                        'jawabans' => $levelJawabans,
-                    ];
-                }
-            }
-        }
 
         // Verification stats
         $verificationStats = [
             'total' => $assessment->jawabans->count(),
-            'verified' => $assessment->jawabans->where('verification_status', Jawaban::VERIFICATION_VERIFIED)->count(),
-            'pending' => $assessment->jawabans->where('verification_status', Jawaban::VERIFICATION_PENDING)->count(),
-            'needs_revision' => $assessment->jawabans->where('verification_status', Jawaban::VERIFICATION_NEEDS_REVISION)->count(),
+            'verified' => $assessment->jawabans->where('verification_status', 'verified')->count(),
+            'pending' => $assessment->jawabans->where('verification_status', 'pending')->count(),
+            'needs_revision' => $assessment->jawabans->where('verification_status', 'needs_revision')->count(),
         ];
 
-        return view('auditor.show', compact('assessment', 'groupedJawabans', 'verificationStats'));
+        // Group jawabans by CobitItem -> Kategori -> Level
+        $groupedJawabans = [];
+        foreach ($assessment->jawabans as $jawaban) {
+            $quisioner = $jawaban->quisioner;
+            if (!$quisioner) continue;
+            
+            $level = $quisioner->level;
+            $kategori = $level->kategori;
+            $cobitItem = $kategori->cobitItem;
+
+            $cobitId = $cobitItem->id;
+            $kategoriId = $kategori->id;
+            $levelId = $level->id;
+
+            if (!isset($groupedJawabans[$cobitId])) {
+                $groupedJawabans[$cobitId] = [
+                    'cobitItem' => $cobitItem,
+                    'kategoris' => []
+                ];
+            }
+
+            if (!isset($groupedJawabans[$cobitId]['kategoris'][$kategoriId])) {
+                $groupedJawabans[$cobitId]['kategoris'][$kategoriId] = [
+                    'kategori' => $kategori,
+                    'levels' => []
+                ];
+            }
+
+            if (!isset($groupedJawabans[$cobitId]['kategoris'][$kategoriId]['levels'][$levelId])) {
+                $groupedJawabans[$cobitId]['kategoris'][$kategoriId]['levels'][$levelId] = [
+                    'level' => $level,
+                    'jawabans' => collect()
+                ];
+            }
+
+            $groupedJawabans[$cobitId]['kategoris'][$kategoriId]['levels'][$levelId]['jawabans']->push($jawaban);
+        }
+
+        return view('auditor.show', compact('assessment', 'verificationStats', 'groupedJawabans'));
     }
 
     /**
@@ -106,19 +143,34 @@ class AuditorController extends Controller
      */
     public function verify(Request $request, Jawaban $jawaban)
     {
+        // Check for row-specific jawaban name (jawaban_{id}) or generic 'jawaban'
+        $jawabanKey = 'jawaban_' . $jawaban->id;
+        $jawabanValue = $request->input($jawabanKey) ?? $request->input('jawaban');
+
         $request->validate([
-            'verification_status' => 'required|in:verified,needs_revision',
-            'auditor_notes' => 'nullable|string|max:1000',
+            'verification_status' => 'required|in:verified,needs_revision,pending',
+            'auditor_evidence' => 'nullable|string|max:1000',
         ]);
 
-        $jawaban->update([
+        // Validate the extracted jawaban value if it exists
+        if ($jawabanValue && !in_array($jawabanValue, ['N', 'P', 'L', 'F'])) {
+            return back()->with('error', 'Pilihan jawaban tidak valid.');
+        }
+
+        $updateData = [
             'verification_status' => $request->verification_status,
-            'auditor_notes' => $request->auditor_notes,
+            'auditor_evidence' => $request->auditor_evidence,
             'verified_by' => Auth::id(),
             'verified_at' => now(),
-        ]);
+        ];
 
-        return back()->with('success', 'Jawaban berhasil diverifikasi.');
+        if ($jawabanValue) {
+            $updateData['jawaban'] = $jawabanValue;
+        }
+
+        $jawaban->update($updateData);
+
+        return back()->with('success', 'Data berhasil diperbarui.');
     }
 
     /**

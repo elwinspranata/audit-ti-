@@ -126,10 +126,14 @@
                                 </span>
                             </div>
 
-                            {{-- Assessment Name --}}
-                            <h4 class="mb-3 text-lg font-bold text-gray-800 dark:text-white leading-tight">
+                            <h4 class="mb-1 text-lg font-bold text-gray-800 dark:text-white leading-tight">
                                 {{ $assessment->name ?? 'Untitled Assessment' }}
                             </h4>
+                            <div class="mb-3">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider {{ $assessment->package_id ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' : 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' }}">
+                                    {{ $assessment->source_label }}
+                                </span>
+                            </div>
 
                             {{-- COBIT Tags --}}
                             <div class="flex flex-wrap gap-1.5 mb-4">

@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             PackageSeeder::class,
             CobitDataSeeder::class,
+            CouponSeeder::class,
         ]);
 
         // // Seeder untuk CobitItem

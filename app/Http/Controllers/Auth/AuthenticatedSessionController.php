@@ -50,6 +50,10 @@ public function store(LoginRequest $request): RedirectResponse
         return redirect()->intended('/admin/dashboard');
     }
 
+    if ($user->role == 'auditor') {
+        return redirect()->intended('/auditor/dashboard');
+    }
+
     return redirect()->intended(RouteServiceProvider::HOME);
 }
 

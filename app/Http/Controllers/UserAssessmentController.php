@@ -14,12 +14,14 @@ class UserAssessmentController extends Controller
      */
     public function index()
     {
-        $assessments = Assessment::where('user_id', Auth::id())
-            ->with(['cobitItems', 'items'])
+        $user = Auth::user()->load('activePackage');
+        
+        $assessments = Assessment::where('user_id', $user->id)
+            ->with(['cobitItems.kategoris.levels.quisioners', 'items', 'jawabans'])
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return view('user.assessments.index', compact('assessments'));
+        return view('user.assessments.index', compact('assessments', 'user'));
     }
 
     /**
@@ -32,7 +34,12 @@ class UserAssessmentController extends Controller
             abort(403, 'Unauthorized access');
         }
 
-        $assessment->load(['items.cobitItem', 'cobitItems', 'approver']);
+        $assessment->load(['items.cobitItem.kategoris.levels.quisioners', 'jawabans', 'approver']);
+
+        // Sync progress to ensure accurate display
+        foreach ($assessment->items as $item) {
+            $item->updateProgress();
+        }
 
         return view('user.assessments.show', compact('assessment'));
     }
@@ -94,13 +101,18 @@ class UserAssessmentController extends Controller
             return back()->with('error', 'Assessment tidak dalam status pengerjaan.');
         }
 
-        // Check if all items have some progress
+        // Sync progress for all items before final check
+        foreach ($assessment->items as $item) {
+            $item->updateProgress();
+        }
+
+        // Check if all items have 100% progress
         $allItemsComplete = $assessment->items->every(function ($item) {
-            return $item->progress >= 100;
+            return $item->progress_percentage >= 100;
         });
 
         if (!$allItemsComplete) {
-            return back()->with('error', 'Semua proses TI harus diselesaikan sebelum submit.');
+            return back()->with('error', 'Semua proses TI harus diselesaikan (100%) sebelum submit.');
         }
 
         $assessment->update([

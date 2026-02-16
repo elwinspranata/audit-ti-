@@ -10,7 +10,7 @@ class AdminPaymentController extends Controller
 {
     public function index()
     {
-        $transactions = Transaction::with(['user', 'package'])->latest()->get();
+        $transactions = Transaction::with(['user', 'package', 'coupon'])->latest()->get();
         return view('admin.payment.index', compact('transactions'));
     }
 
@@ -47,6 +47,7 @@ class AdminPaymentController extends Controller
                 'package' => $transaction->package->name,
             ]);
             $transaction->user->activateSubscription($transaction->package);
+            // Assessment::createForUser line removed to allow manual admin creation
         }
 
         return redirect()->route('admin.payments.index')->with('success', 'Status pembayaran berhasil diperbarui.');

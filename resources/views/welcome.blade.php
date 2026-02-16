@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Landing Page Audit Proses TI</title>
+    <title>Landing Page Assessment Proses TI</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
@@ -18,15 +18,15 @@
             <div class="flex flex-col justify-center">
                 <h1
                     class="mb-4 text-4xl font-extrabold leading-none tracking-tight text-gray-900 md:text-5xl lg:text-6xl dark:text-white">
-                    Optimalkan Audit Proses TI untuk Keamanan & Efisiensi
+                    Optimalkan Assessment Proses TI untuk Keamanan & Efisiensi
                 </h1>
                 <p class="mb-6 text-lg font-normal text-gray-500 lg:text-xl dark:text-gray-400">
-                    Kami fokus melakukan audit dan pengawasan proses teknologi informasi untuk mendukung keamanan,
+                    Kami fokus melakukan assessment dan pengawasan proses teknologi informasi untuk mendukung keamanan,
                     kepatuhan, dan pertumbuhan bisnis jangka panjang yang berkelanjutan.
                 </p>
-                <a href="{{ route('audit.index') }}"
+                <a href="{{ route('pricing.index') }}"
                     class="inline-flex items-center text-lg font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                    Pelajari lebih lanjut tentang audit TI kami
+                    Pelajari lebih lanjut tentang assessment TI kami
                     <svg class="w-3.5 h-3.5 ms-2 rtl:rotate-180" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                         fill="none" viewBox="0 0 14 10">
                         <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
