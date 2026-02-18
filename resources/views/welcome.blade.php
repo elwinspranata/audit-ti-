@@ -5,7 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Landing Page Assessment Proses TI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="description" content="Sistem Informasi Assessment Proses Teknologi Informasi - Solusi profesional untuk audit dan pengawasan infrastruktur TI Anda." />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="relative min-h-screen bg-gray-900">

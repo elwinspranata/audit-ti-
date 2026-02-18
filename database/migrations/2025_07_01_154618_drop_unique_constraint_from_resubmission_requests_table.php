@@ -14,18 +14,18 @@ return new class extends Migration
     public function up()
     {
         Schema::table('resubmission_requests', function (Blueprint $table) {
-            // 1. Hapus foreign key yang ada terlebih dahulu.
-            // Laravel secara default menamai foreign key dengan format: tabel_kolom_foreign
-            $table->dropForeign(['user_id']);
-            $table->dropForeign(['level_id']);
+            if (\DB::getDriverName() !== 'sqlite') {
+                // 1. Hapus foreign key yang ada terlebih dahulu.
+                $table->dropForeign(['user_id']);
+                $table->dropForeign(['level_id']);
 
-            // 2. Sekarang, hapus index unik yang menyebabkan error.
-            // Ganti 'user_level_pending_request_unique' jika nama index Anda berbeda.
-            $table->dropUnique('user_level_pending_request_unique');
+                // 2. Sekarang, hapus index unik yang menyebabkan error.
+                $table->dropUnique('user_level_pending_request_unique');
 
-            // 3. Buat kembali foreign key yang tadi dihapus.
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
-            $table->foreign('level_id')->references('id')->on('levels')->onDelete('cascade');
+                // 3. Buat kembali foreign key yang tadi dihapus.
+                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+                $table->foreign('level_id')->references('id')->on('levels')->onDelete('cascade');
+            }
         });
     }
 

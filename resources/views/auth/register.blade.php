@@ -5,7 +5,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Register Audit Proses TI</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="description" content="Daftar akun baru di Sistem Informasi Audit Proses Teknologi Informasi untuk mulai mengelola kepatuhan dan keamanan TI Anda." />
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body class="relative min-h-screen bg-gray-900">

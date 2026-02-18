@@ -612,7 +612,7 @@
                 }
 
                 try {
-                    const response = await fetch(`/audit/${assessmentId}/${levelId}/draft`, {
+                    const response = await fetch("{{ route('jawaban.saveDraft', ['assessment' => $assessment->id, 'level' => $level->id]) }}", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

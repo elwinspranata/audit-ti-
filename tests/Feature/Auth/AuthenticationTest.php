@@ -20,7 +20,9 @@ class AuthenticationTest extends TestCase
 
     public function test_users_can_authenticate_using_the_login_screen(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create([
+            'is_approved' => true,
+        ]);
 
         $response = $this->post('/login', [
             'email' => $user->email,
@@ -28,6 +30,7 @@ class AuthenticationTest extends TestCase
         ]);
 
         $this->assertAuthenticated();
+        // Check where it redirects based on role (default is 'user')
         $response->assertRedirect(RouteServiceProvider::HOME);
     }
 

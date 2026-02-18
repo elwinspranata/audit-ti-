@@ -29,26 +29,21 @@ class PaymentFlowTest extends TestCase
     public function test_user_without_subscription_cannot_access_audit()
     {
         $user = User::factory()->create(['role' => 'user']);
+        $package = Package::first();
+        $assessment = \App\Models\Assessment::create([
+            'user_id' => $user->id,
+            'name' => 'Test Assessment',
+            'package_id' => $package->id,
+            'status' => \App\Models\Assessment::STATUS_PENDING_SUBMISSION
+        ]);
 
-        $response = $this->actingAs($user)->get(route('audit.index'));
+        $response = $this->actingAs($user)->get(route('audit.index', $assessment));
 
         $response->assertRedirect(route('pricing.index'));
     }
 
     public function test_user_can_view_checkout_page_and_create_transaction()
     {
-        // Mock Midtrans Snap because we don't have real keys in test env
-        // We need to partial mock the helper or just intercept the request in Controller
-        // Since Snap is a static class, standard mocking is hard without Mockery alias or Facade.
-        
-        // HOWEVER, for this test, let's verify up to the point of creation.
-        // We will mock the Snap class method if possible, or handle the exception.
-        // A simpler way for this environment is to verify the logic BEFORE the external API call or catch it.
-        
-        // Let's create a partial mock for the controller? No.
-        
-        // Actually, let's focus on the logic parts we control completely first.
-        
         $user = User::factory()->create(['role' => 'user']);
         $package = Package::first();
 
@@ -56,9 +51,6 @@ class PaymentFlowTest extends TestCase
         $response = $this->actingAs($user)->get(route('pricing.index'));
         $response->assertStatus(200);
         $response->assertSee($package->name);
-        
-        // 2. We can't easily test 'checkout' route because it calls Midtrans Snap immediately.
-        // But we CAN verify the Admin Approval Logic if we create a transaction manually (simulating the callback/webhook)
     }
 
     public function test_admin_can_approve_payment_and_give_access()
@@ -77,12 +69,20 @@ class PaymentFlowTest extends TestCase
             'payment_method' => 'midtrans',
         ]);
 
+        $assessment = \App\Models\Assessment::create([
+            'user_id' => $user->id,
+            'name' => 'Test Assessment',
+            'package_id' => $package->id,
+            'transaction_id' => $transaction->id,
+            'status' => \App\Models\Assessment::STATUS_PENDING_SUBMISSION
+        ]);
+
         // 1. User still cannot access audit
-        $response = $this->actingAs($user)->get(route('audit.index'));
+        $response = $this->actingAs($user)->get(route('audit.index', $assessment));
         $response->assertRedirect(route('pricing.index'));
 
         // 2. Admin approves it
-        $admin = User::factory()->create(['role' => 'admin']);
+        $admin = User::factory()->create(['role' => 'admin', 'is_approved' => true]);
         
         // Admin views the transaction
         $response = $this->actingAs($admin)->get(route('admin.payments.show', $transaction->id));
@@ -102,7 +102,12 @@ class PaymentFlowTest extends TestCase
         ]);
 
         // 3. User should now have access
-        $response = $this->actingAs($user)->get(route('audit.index'));
+        $user->refresh();
+        // audit.index redirects to user.assessments.show
+        $response = $this->actingAs($user)->get(route('audit.index', $assessment));
+        $response->assertRedirect(route('user.assessments.show', $assessment));
+        
+        $response = $this->actingAs($user)->get(route('user.assessments.show', $assessment));
         $response->assertStatus(200); // Success!        
     }
 }
