@@ -4,7 +4,11 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
+<<<<<<< HEAD
     "content-hash": "f34cdec57ff942e616cc1097ad7fcf13",
+=======
+    "content-hash": "0beb18688305accffcee6739a3c04df3",
+>>>>>>> dbde533b00df673c90e5e7d881de95a53127d6fb
     "packages": [
         {
             "name": "barryvdh/laravel-dompdf",
@@ -6687,6 +6691,7 @@
     ],
     "packages-dev": [
         {
+<<<<<<< HEAD
             "name": "doctrine/dbal",
             "version": "3.10.4",
             "source": {
@@ -6940,6 +6945,8 @@
             "time": "2026-01-29T07:11:08+00:00"
         },
         {
+=======
+>>>>>>> dbde533b00df673c90e5e7d881de95a53127d6fb
             "name": "fakerphp/faker",
             "version": "v1.24.1",
             "source": {
@@ -8106,6 +8113,7 @@
             "time": "2025-06-20T11:29:11+00:00"
         },
         {
+<<<<<<< HEAD
             "name": "psr/cache",
             "version": "3.0.0",
             "source": {
@@ -8155,6 +8163,8 @@
             "time": "2021-02-03T23:26:27+00:00"
         },
         {
+=======
+>>>>>>> dbde533b00df673c90e5e7d881de95a53127d6fb
             "name": "sebastian/cli-parser",
             "version": "2.0.1",
             "source": {

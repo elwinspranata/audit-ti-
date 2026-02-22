@@ -22,8 +22,6 @@ use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ResubmissionRequestController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\Admin\AdminPaymentController;
-use App\Mail\NewUserForApproval;
-use Illuminate\Support\Facades\Mail;
 
 // ================= MAIN ROUTES ====================
 
@@ -50,27 +48,6 @@ Route::middleware('auth')->group(function () {
 });
 
 
-// ================= TEST EMAIL ====================
-
-Route::get('/test-email', function () {
-    $admin = User::where('role', 'admin')->first();
-
-    if (!$admin) {
-        return "Gagal: Tidak ada user admin.";
-    }
-
-    $dummyUser = new User([
-        'name' => 'Test User',
-        'email' => 'test@example.com'
-    ]);
-
-    try {
-        Mail::to($admin->email)->send(new NewUserForApproval($dummyUser));
-        return "Email tes terkirim ke " . $admin->email;
-    } catch (\Exception $e) {
-        return "Gagal: " . $e->getMessage();
-    }
-});
 
 
 // ================= ADMIN ROUTES ====================
@@ -206,6 +183,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
     // DF10 Routes
     Route::post('/design-factors-df10/calculate', [\App\Http\Controllers\DesignFactorController::class, 'calculateDf10'])
         ->name('design-factors.df10.calculate');
+
 
 
 
