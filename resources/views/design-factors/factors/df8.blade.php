@@ -235,7 +235,7 @@
         fetch('{{ route('design-factors.df8.calculate') }}', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-            body: JSON.stringify({ importance_outsourcing: out, importance_cloud: cloud, importance_insourced: ins })
+            body: JSON.stringify({ factor_type: 'DF8', importance_outsourcing: out, importance_cloud: cloud, importance_insourced: ins })
         })
         .then(response => response.json())
         .then(data => {

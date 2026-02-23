@@ -31,6 +31,18 @@
                 </div>
             @endif
 
+            <!-- Error Alert -->
+            @if(session('error'))
+                <div class="flex items-center p-4 mb-6 bg-red-100 border border-red-300 rounded-lg shadow-sm">
+                    <svg class="w-5 h-5 mr-3 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd"></path>
+                    </svg>
+                    <span class="text-red-800">{{ session('error') }}</span>
+                </div>
+            @endif
+
             <form id="designFactorForm" action="{{ route('design-factors.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="factor_type" value="{{ $type }}">

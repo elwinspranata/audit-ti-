@@ -34,7 +34,7 @@ class DesignFactor extends Model
     {
         $dfs = self::where('user_id', $userId)->whereIn('factor_type', ['DF1', 'DF2', 'DF3', 'DF4'])->get();
         $sums = [];
-        
+
         foreach ($dfs as $df) {
             $items = $df->items;
             foreach ($items as $item) {
@@ -56,7 +56,8 @@ class DesignFactor extends Model
     {
         $sums = self::getRawPhase1Sums($userId);
 
-        if (empty($sums)) return [];
+        if (empty($sums))
+            return [];
 
         // MAX(MAX(sums), ABS(MIN(sums))) = max absolute value
         $maxMagnitude = 0;
@@ -71,9 +72,9 @@ class DesignFactor extends Model
             if ($maxMagnitude > 0) {
                 // Excel uses TRUNC then MROUND(x, 5)
                 $val = (100 * $sum) / $maxMagnitude;
-                $truncated = (int)$val; // TRUNC toward zero
+                $truncated = (int) $val; // TRUNC toward zero
                 // MROUND to nearest 5
-                $scaled[$code] = (int)(round($truncated / 5) * 5);
+                $scaled[$code] = (int) (round($truncated / 5) * 5);
             } else {
                 $scaled[$code] = 0;
             }
@@ -91,12 +92,12 @@ class DesignFactor extends Model
     {
         // Phase 1: Raw DF1-DF4 RI sums (NOT scaled)
         $rawPhase1 = self::getRawPhase1Sums($userId);
-        
+
         // Phase 2: Sum of DF5-DF10 adjustments
         $adjustments = [];
         $p2Filters = ['DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10'];
         $dfs = self::where('user_id', $userId)->whereIn('factor_type', $p2Filters)->get();
-        
+
         foreach ($dfs as $df) {
             foreach ($df->items as $item) {
                 if (!isset($adjustments[$item->code])) {
@@ -109,7 +110,7 @@ class DesignFactor extends Model
         $final = [];
         // Use all possible GMO codes
         $allCodes = array_unique(array_merge(array_keys($rawPhase1), array_keys($adjustments)));
-        
+
         foreach ($allCodes as $code) {
             $p1 = $rawPhase1[$code] ?? 0;
             $p2 = $adjustments[$code] ?? 0;
@@ -326,22 +327,34 @@ class DesignFactor extends Model
             } elseif ($type === 'DF4') {
                 $inputs[$key] = ['importance' => 1, 'baseline' => 2];
             } elseif ($type === 'DF6') {
-                if ($key === 'high') $inputs[$key] = ['importance' => 25, 'baseline' => 0];
-                elseif ($key === 'normal') $inputs[$key] = ['importance' => 75, 'baseline' => 100];
-                elseif ($key === 'low') $inputs[$key] = ['importance' => 0, 'baseline' => 0];
+                if ($key === 'high')
+                    $inputs[$key] = ['importance' => 25, 'baseline' => 0];
+                elseif ($key === 'normal')
+                    $inputs[$key] = ['importance' => 75, 'baseline' => 100];
+                elseif ($key === 'low')
+                    $inputs[$key] = ['importance' => 0, 'baseline' => 0];
             } elseif ($type === 'DF8') {
-                if ($key === 'outsourcing') $inputs[$key] = ['importance' => 10, 'baseline' => 33];
-                elseif ($key === 'cloud') $inputs[$key] = ['importance' => 50, 'baseline' => 33];
-                elseif ($key === 'insourced') $inputs[$key] = ['importance' => 40, 'baseline' => 34];
+                if ($key === 'outsourcing')
+                    $inputs[$key] = ['importance' => 10, 'baseline' => 33];
+                elseif ($key === 'cloud')
+                    $inputs[$key] = ['importance' => 50, 'baseline' => 33];
+                elseif ($key === 'insourced')
+                    $inputs[$key] = ['importance' => 40, 'baseline' => 34];
             } elseif ($type === 'DF9') {
-                if ($key === 'agile') $inputs[$key] = ['importance' => 50, 'baseline' => 15];
-                elseif ($key === 'devops') $inputs[$key] = ['importance' => 10, 'baseline' => 10];
-                elseif ($key === 'traditional') $inputs[$key] = ['importance' => 40, 'baseline' => 75];
+                if ($key === 'agile')
+                    $inputs[$key] = ['importance' => 50, 'baseline' => 15];
+                elseif ($key === 'devops')
+                    $inputs[$key] = ['importance' => 10, 'baseline' => 10];
+                elseif ($key === 'traditional')
+                    $inputs[$key] = ['importance' => 40, 'baseline' => 75];
             } elseif ($type === 'DF10') {
                 // Baselines from Excel: First Mover=15%, Follower=70%, Slow Adopter=15%
-                if ($key === 'first_mover') $inputs[$key] = ['importance' => 75, 'baseline' => 15];
-                elseif ($key === 'follower') $inputs[$key] = ['importance' => 15, 'baseline' => 70];
-                elseif ($key === 'slow_adopter') $inputs[$key] = ['importance' => 10, 'baseline' => 15];
+                if ($key === 'first_mover')
+                    $inputs[$key] = ['importance' => 75, 'baseline' => 15];
+                elseif ($key === 'follower')
+                    $inputs[$key] = ['importance' => 15, 'baseline' => 70];
+                elseif ($key === 'slow_adopter')
+                    $inputs[$key] = ['importance' => 10, 'baseline' => 15];
             } else {
                 $inputs[$key] = ['importance' => 3, 'baseline' => 3];
             }
@@ -354,8 +367,8 @@ class DesignFactor extends Model
      */
     public static function getDefaultCobitItems(string $type): array
     {
-        $gmoCodes = ['EDM01','EDM02','EDM03','EDM04','EDM05','APO01','APO02','APO03','APO04','APO05','APO06','APO07','APO08','APO09','APO10','APO11','APO12','APO13','APO14','BAI01','BAI02','BAI03','BAI04','BAI05','BAI06','BAI07','BAI08','BAI09','BAI10','BAI11','DSS01','DSS02','DSS03','DSS04','DSS05','DSS06','MEA01','MEA02','MEA03','MEA04'];
-        
+        $gmoCodes = ['EDM01', 'EDM02', 'EDM03', 'EDM04', 'EDM05', 'APO01', 'APO02', 'APO03', 'APO04', 'APO05', 'APO06', 'APO07', 'APO08', 'APO09', 'APO10', 'APO11', 'APO12', 'APO13', 'APO14', 'BAI01', 'BAI02', 'BAI03', 'BAI04', 'BAI05', 'BAI06', 'BAI07', 'BAI08', 'BAI09', 'BAI10', 'BAI11', 'DSS01', 'DSS02', 'DSS03', 'DSS04', 'DSS05', 'DSS06', 'MEA01', 'MEA02', 'MEA03', 'MEA04'];
+
         $items = [];
         foreach ($gmoCodes as $code) {
             $items[] = [
@@ -373,7 +386,8 @@ class DesignFactor extends Model
      */
     public function calculateRelativeImportance(float $score, float $baselineScore): float
     {
-        if ($baselineScore == 0) return 0;
+        if ($baselineScore == 0)
+            return 0;
 
         if (in_array($this->factor_type, ['DF5', 'DF6', 'DF8', 'DF9', 'DF10'])) {
             $calculated = (100 * $score) / $baselineScore;
@@ -391,9 +405,11 @@ class DesignFactor extends Model
     public function getAverageImportance(): float
     {
         $inputs = $this->inputs ?? [];
-        if (empty($inputs)) return 0;
+        if (empty($inputs))
+            return 0;
 
-        $sum = 0; $count = 0;
+        $sum = 0;
+        $count = 0;
         foreach ($inputs as $input) {
             if ($this->factor_type === 'DF3') {
                 $sum += ($input['impact'] ?? 3) * ($input['likelihood'] ?? 3);
@@ -411,9 +427,11 @@ class DesignFactor extends Model
     public function getAverageBaseline(): float
     {
         $inputs = $this->inputs ?? [];
-        if (empty($inputs)) return 0;
+        if (empty($inputs))
+            return 0;
 
-        $sum = 0; $count = 0;
+        $sum = 0;
+        $count = 0;
         foreach ($inputs as $input) {
             $sum += ($input['baseline'] ?? 3);
             $count++;
@@ -510,7 +528,8 @@ class DesignFactor extends Model
             $mapping = \App\Utils\CobitData::getDF1Mapping();
             $meta = array_keys(self::getMetadata('DF1'));
             foreach ($mapping as $code => $mapRow) {
-                $score = 0; $baseline = 0;
+                $score = 0;
+                $baseline = 0;
                 foreach ($meta as $idx => $key) {
                     $imp = isset($inputs[$key]['importance']) ? $inputs[$key]['importance'] : 3;
                     $score += $mapRow[$idx] * $imp;
@@ -521,7 +540,8 @@ class DesignFactor extends Model
         } elseif ($this->factor_type === 'DF2') {
             $eg2ag = \App\Utils\CobitData::getDF2EgToAgMapping();
             $ag2gmo = \App\Utils\CobitData::getDF2AgToGmoMapping();
-            $agScores = array_fill(0, 13, 0); $agBaselines = array_fill(0, 13, 0);
+            $agScores = array_fill(0, 13, 0);
+            $agBaselines = array_fill(0, 13, 0);
             foreach ($eg2ag as $egCode => $agWeights) {
                 $imp = isset($inputs[$egCode]['importance']) ? $inputs[$egCode]['importance'] : 3;
                 foreach ($agWeights as $agIdx => $w) {
@@ -531,7 +551,9 @@ class DesignFactor extends Model
             }
             $gmoCodes = array_keys(collect(self::getDefaultCobitItems('DF1'))->keyBy('code')->toArray());
             foreach ($gmoCodes as $gIdx => $code) {
-                $score = 0; $baseline = 0; $agIdx = 0;
+                $score = 0;
+                $baseline = 0;
+                $agIdx = 0;
                 foreach ($ag2gmo as $agCode => $gmoWeights) {
                     $w = $gmoWeights[$gIdx] ?? 0;
                     $score += $w * $agScores[$agIdx];
@@ -544,7 +566,8 @@ class DesignFactor extends Model
             $mapping = \App\Utils\CobitData::getDF3Mapping();
             $meta = array_keys(self::getMetadata('DF3'));
             foreach ($mapping as $code => $mapRow) {
-                $score = 0; $baseline = 0;
+                $score = 0;
+                $baseline = 0;
                 foreach ($meta as $idx => $key) {
                     $imp = isset($inputs[$key]['impact']) ? $inputs[$key]['impact'] : 3;
                     $lik = isset($inputs[$key]['likelihood']) ? $inputs[$key]['likelihood'] : 3;
@@ -557,7 +580,8 @@ class DesignFactor extends Model
             $mapping = \App\Utils\CobitData::getDF4Mapping();
             $meta = array_keys(self::getMetadata('DF4'));
             foreach ($mapping as $code => $mapRow) {
-                $score = 0; $baseline = 0;
+                $score = 0;
+                $baseline = 0;
                 foreach ($meta as $idx => $key) {
                     $imp = isset($inputs[$key]['importance']) ? $inputs[$key]['importance'] : 1;
                     $score += $mapRow[$idx] * $imp;
@@ -569,7 +593,8 @@ class DesignFactor extends Model
             $mapping = \App\Utils\CobitData::getDF7Mapping();
             $meta = array_keys(self::getMetadata('DF7'));
             foreach ($mapping as $code => $mapRow) {
-                $score = 0; $baseline = 0;
+                $score = 0;
+                $baseline = 0;
                 foreach ($meta as $idx => $key) {
                     $imp = isset($inputs[$key]['importance']) ? $inputs[$key]['importance'] : 3;
                     $score += $mapRow[$idx] * $imp;
@@ -581,12 +606,12 @@ class DesignFactor extends Model
             $mapping = \App\Utils\CobitData::getDF5Mapping();
             foreach ($mapping as $code => $mapRow) {
                 $score = ($mapRow[0] * (isset($inputs['high']['importance']) ? $inputs['high']['importance'] : 50) / 100) +
-                         ($mapRow[1] * (isset($inputs['normal']['importance']) ? $inputs['normal']['importance'] : 50) / 100);
+                    ($mapRow[1] * (isset($inputs['normal']['importance']) ? $inputs['normal']['importance'] : 50) / 100);
                 $baseline = ($mapRow[0] * 33 / 100) + ($mapRow[1] * 67 / 100);
                 $results[$code] = ['score' => $score, 'baseline_score' => $baseline];
             }
         } elseif (in_array($this->factor_type, ['DF6', 'DF8', 'DF9', 'DF10'])) {
-            $mapSet = match($this->factor_type) {
+            $mapSet = match ($this->factor_type) {
                 'DF6' => \App\Utils\CobitData::getDF6Mapping(),
                 'DF8' => \App\Utils\CobitData::getDF8Mapping(),
                 'DF9' => \App\Utils\CobitData::getDF9Mapping(),
@@ -594,7 +619,8 @@ class DesignFactor extends Model
             };
             $meta = array_keys(self::getMetadata($this->factor_type));
             foreach ($mapSet as $code => $mapRow) {
-                $score = 0; $baseline = 0;
+                $score = 0;
+                $baseline = 0;
                 foreach ($meta as $idx => $key) {
                     $imp = isset($inputs[$key]['importance']) ? $inputs[$key]['importance'] : 0;
                     $base = isset($inputs[$key]['baseline']) ? $inputs[$key]['baseline'] : 0;
@@ -620,19 +646,56 @@ class DesignFactor extends Model
     {
         $types = ['DF1', 'DF2', 'DF3', 'DF4', 'DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10'];
         $progress = [];
-        foreach ($types as $type) {
+        foreach ($types as $index => $type) {
             $df = self::where('user_id', $userId)->where('factor_type', $type)->first();
+            $isCompleted = $df ? $df->is_completed : false;
+
+            // DF1 is always accessible; others require previous DF to be completed
+            if ($index === 0) {
+                $isAccessible = true;
+            } else {
+                $prevType = $types[$index - 1];
+                $isAccessible = isset($progress[$prevType]) && $progress[$prevType]['completed'];
+            }
+
             $progress[$type] = [
-                'completed' => $df ? $df->is_completed : false,
+                'completed' => $isCompleted,
                 'locked' => $df ? $df->is_locked : false,
-                'accessible' => true, // Simplified
+                'accessible' => $isAccessible,
             ];
         }
+
+        // Summary DF1-DF4: accessible only if DF1-DF4 all completed
+        $summaryAccessible = true;
+        foreach (['DF1', 'DF2', 'DF3', 'DF4'] as $t) {
+            if (!$progress[$t]['completed']) {
+                $summaryAccessible = false;
+                break;
+            }
+        }
+        $progress['Summary'] = [
+            'completed' => $summaryAccessible,
+            'locked' => false,
+            'accessible' => $summaryAccessible,
+        ];
+
         return $progress;
     }
 
-    public static function getDF10Mapping() { return \App\Utils\CobitData::getDF10Mapping(); }
-    public static function getDF9Mapping() { return \App\Utils\CobitData::getDF9Mapping(); }
-    public static function getDF8Mapping() { return \App\Utils\CobitData::getDF8Mapping(); }
-    public static function getDF6Mapping() { return \App\Utils\CobitData::getDF6Mapping(); }
+    public static function getDF10Mapping()
+    {
+        return \App\Utils\CobitData::getDF10Mapping();
+    }
+    public static function getDF9Mapping()
+    {
+        return \App\Utils\CobitData::getDF9Mapping();
+    }
+    public static function getDF8Mapping()
+    {
+        return \App\Utils\CobitData::getDF8Mapping();
+    }
+    public static function getDF6Mapping()
+    {
+        return \App\Utils\CobitData::getDF6Mapping();
+    }
 }

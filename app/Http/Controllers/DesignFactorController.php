@@ -16,7 +16,16 @@ class DesignFactorController extends Controller
     public function index(string $type = 'DF1')
     {
         $user = Auth::user();
-        
+
+        // Sequential access guard: redirect if trying to access a DF that isn't unlocked yet
+        if ($type !== 'DF1') {
+            $progress = DesignFactor::getProgress($user->id);
+            if (isset($progress[$type]) && !$progress[$type]['accessible']) {
+                return redirect()->route('design-factors.index', 'DF1')
+                    ->with('error', "Anda harus menyelesaikan Design Factor sebelumnya terlebih dahulu.");
+            }
+        }
+
         // Get or create model
         $designFactor = DesignFactor::where('user_id', $user->id)
             ->where('factor_type', $type)
@@ -35,7 +44,7 @@ class DesignFactorController extends Controller
 
         // Get calculated results for display
         $results = $designFactor->getCalculatedResults();
-        
+
         // Flatten results for blade compat
         $flatResults = [];
         foreach ($results as $code => $data) {
@@ -95,7 +104,7 @@ class DesignFactorController extends Controller
         }
 
         $inputs = $request->input('inputs');
-        
+
         // Handle specialized mappings for DF5, DF6, DF8 etc. that don't use 'inputs[]' nested array in blade
         if (!$inputs) {
             if ($type === 'DF5') {
@@ -190,7 +199,7 @@ class DesignFactorController extends Controller
 
         $tempDf = new DesignFactor(['factor_type' => $type, 'inputs' => $inputs]);
         $results = $tempDf->getCalculatedResults();
-        
+
         $flatResults = [];
         foreach ($results as $code => $data) {
             $flatResults[] = array_merge(['code' => $code], $data);
@@ -204,11 +213,26 @@ class DesignFactorController extends Controller
         ]);
     }
 
-    public function calculateDf5(Request $request) { return $this->calculate($request); }
-    public function calculateDf6(Request $request) { return $this->calculate($request); }
-    public function calculateDf8(Request $request) { return $this->calculate($request); }
-    public function calculateDf9(Request $request) { return $this->calculate($request); }
-    public function calculateDf10(Request $request) { return $this->calculate($request); }
+    public function calculateDf5(Request $request)
+    {
+        return $this->calculate($request);
+    }
+    public function calculateDf6(Request $request)
+    {
+        return $this->calculate($request);
+    }
+    public function calculateDf8(Request $request)
+    {
+        return $this->calculate($request);
+    }
+    public function calculateDf9(Request $request)
+    {
+        return $this->calculate($request);
+    }
+    public function calculateDf10(Request $request)
+    {
+        return $this->calculate($request);
+    }
 
     /**
      * Show aggregated summary for DF1-DF4
@@ -217,7 +241,7 @@ class DesignFactorController extends Controller
     {
         $user = Auth::user();
         $aggregated = DesignFactor::getScaledPhase1($user->id);
-        
+
         $dfData = [];
         foreach (['DF1', 'DF2', 'DF3', 'DF4'] as $type) {
             $df = DesignFactor::where('user_id', $user->id)->where('factor_type', $type)->first();
@@ -242,7 +266,7 @@ class DesignFactorController extends Controller
     {
         $user = Auth::user();
         $aggregated = DesignFactor::getFinalSummary($user->id);
-        
+
         $dfData = [];
         foreach (['DF5', 'DF6', 'DF7', 'DF8', 'DF9', 'DF10'] as $type) {
             $df = DesignFactor::where('user_id', $user->id)->where('factor_type', $type)->first();
@@ -267,7 +291,7 @@ class DesignFactorController extends Controller
         DesignFactor::where('user_id', $user->id)
             ->whereIn('factor_type', ['DF1', 'DF2', 'DF3', 'DF4'])
             ->update(['is_locked' => true]);
-            
+
         return redirect()->route('design-factors.summary')->with('success', 'DF1-DF4 Locked.');
     }
 
@@ -275,10 +299,10 @@ class DesignFactorController extends Controller
     {
         $user = Auth::user();
         DesignFactor::where('user_id', $user->id)->delete();
-        DesignFactorItem::whereHas('designFactor', function($q) use ($user) {
+        DesignFactorItem::whereHas('designFactor', function ($q) use ($user) {
             $q->where('user_id', $user->id);
         })->delete();
-        
+
         return redirect()->route('design-factors.index')->with('success', 'Reset complete.');
     }
 }
