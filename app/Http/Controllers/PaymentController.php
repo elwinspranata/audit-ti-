@@ -152,6 +152,11 @@ class PaymentController extends Controller
             abort(403);
         }
 
+        // Cek status real-time ke Midtrans jika masih pending
+        if ($transaction->payment_status === 'pending') {
+            $this->checkStatusViaMidtrans($transaction);
+        }
+
         // Load relasi penting
         $transaction->loadMissing(['package', 'user']);
 
@@ -236,61 +241,77 @@ class PaymentController extends Controller
             return response()->json(['message' => 'Transaction not found'], 200);
         }
 
+        $this->updateStatusFromMidtrans($transaction, $request->transaction_status, $request->fraud_status);
+
+        return response()->json(['message' => 'Callback processed'], 200);
+    }
+
+    /**
+     * Helper to update transaction mapping Midtrans status to our local status
+     */
+    private function updateStatusFromMidtrans(Transaction $transaction, $midtransStatus, $fraudStatus = 'accept')
+    {
         $oldStatus = $transaction->payment_status;
 
-        // Tangani status
-        switch ($request->transaction_status) {
+        switch ($midtransStatus) {
             case 'capture':
-                // CC capture (periksa fraud)
-                $fraudStatus = $request->fraud_status ?? 'accept';
-                if ($fraudStatus === 'accept') {
+                if (($fraudStatus ?? 'accept') === 'accept') {
                     $transaction->payment_status = 'paid';
-                    // $this->activateSubscription($transaction); // Removed: Must be verified by Admin first
                 } elseif ($fraudStatus === 'challenge') {
                     $transaction->payment_status = 'challenge';
-                    // jangan aktifkan subscription sebelum manual verify
                 } else {
                     $transaction->payment_status = 'cancelled';
                 }
                 break;
-
             case 'settlement':
                 $transaction->payment_status = 'paid';
-                // $this->activateSubscription($transaction); // Removed: Must be verified by Admin first
                 break;
-
             case 'pending':
                 $transaction->payment_status = 'pending';
                 break;
-
             case 'deny':
                 $transaction->payment_status = 'denied';
                 break;
-
             case 'cancel':
                 $transaction->payment_status = 'cancelled';
                 break;
-
             case 'expire':
                 $transaction->payment_status = 'expired';
                 break;
-
             default:
-                Log::warning('Unknown transaction status', [
-                    'status' => $request->transaction_status,
-                    'order_id' => $request->order_id
-                ]);
+                Log::warning('Unknown Midtrans status', ['status' => $midtransStatus]);
         }
 
-        $transaction->save();
+        if ($transaction->isDirty('payment_status')) {
+            $transaction->save();
+            Log::info('Transaction payment status updated', [
+                'transaction_code' => $transaction->transaction_code,
+                'old_status' => $oldStatus,
+                'new_status' => $transaction->payment_status
+            ]);
+        }
+    }
 
-        Log::info('Transaction status updated', [
-            'order_id' => $request->order_id,
-            'old_status' => $oldStatus,
-            'new_status' => $transaction->payment_status
-        ]);
-
-        return response()->json(['message' => 'Callback processed'], 200);
+    /**
+     * Query Midtrans status API manually
+     */
+    public function checkStatusViaMidtrans(Transaction $transaction)
+    {
+        try {
+            $status = \Midtrans\Transaction::status($transaction->transaction_code);
+            $this->updateStatusFromMidtrans(
+                $transaction, 
+                $status->transaction_status, 
+                $status->fraud_status ?? 'accept'
+            );
+            return true;
+        } catch (\Exception $e) {
+            Log::error('Check Midtrans status failed', [
+                'transaction_code' => $transaction->transaction_code,
+                'error' => $e->getMessage()
+            ]);
+            return false;
+        }
     }
 
     // Aktivasi Subscription (Removed: Moved to User model)
@@ -325,32 +346,14 @@ class PaymentController extends Controller
             ->latest()
             ->get();
 
+        // Cek status Midtrans untuk transaksi yang masih pending
+        foreach ($transactions as $trx) {
+            if ($trx->payment_status === 'pending') {
+                $this->checkStatusViaMidtrans($trx);
+            }
+        }
+
         return view('payment.history', compact('transactions'));
-    }
-
-
-
-    // 6. Verifikasi Admin (manual)
-    public function verifyByAdmin($id)
-    {
-        $transaction = Transaction::findOrFail($id);
-
-        if ($transaction->payment_status !== 'paid') {
-            $transaction->payment_status = 'paid';
-        }
-
-        if ($transaction->admin_status === 'verified') {
-            return back()->with('info', 'Transaksi sudah diverifikasi sebelumnya.');
-        }
-
-        $transaction->admin_status = 'verified';
-        $transaction->save();
-        
-        // Always activate/update subscription on manual verification
-        $transaction->user->activateSubscription($transaction->package);
-        // Assessment::createForUser line removed
-
-        return back()->with('success', 'Transaksi berhasil diverifikasi, subscription diaktifkan.');
     }
 
     // Tambahan: endpoint pay() agar AJAX frontend dapat meminta snap token

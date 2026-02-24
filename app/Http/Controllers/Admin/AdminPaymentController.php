@@ -28,17 +28,20 @@ class AdminPaymentController extends Controller
         // Update status admin
         $transaction->admin_status = $request->admin_status;
         
-        // Jika Admin menyetujui secara manual, kita anggap pembayaran sudah 'paid' 
-        // Ini berguna jika callback Midtrans tidak masuk (misal di localhost)
-        if ($request->admin_status === 'approved') {
+        // Option: If it's a manual transfer, admin might want to mark as paid too
+        // But for Midtrans, we usually wait for the actual status.
+        // We'll keep a fallback or a way for admin to force it if needed.
+        // For now, let's allow admin to set it to paid if they are sure.
+        if ($request->admin_status === 'approved' && $transaction->payment_status !== 'paid') {
+            // Log it but maybe don't force it if we want strict decoupling
+            // However, typical user flow: Admin sees proof -> Admin approves -> System should treat as paid.
             $transaction->payment_status = 'paid';
         }
         
         $transaction->save();
 
-        // Refresh to get updated values
-        $transaction->refresh();
-        $transaction->loadMissing(['user', 'package']);
+        // Refresh and load relations
+        $transaction->load(['user', 'package']);
 
         // Aktifkan subscription
         if ($transaction->admin_status === 'approved' && $transaction->payment_status === 'paid') {
@@ -47,9 +50,8 @@ class AdminPaymentController extends Controller
                 'package' => $transaction->package->name,
             ]);
             $transaction->user->activateSubscription($transaction->package);
-            // Assessment::createForUser line removed to allow manual admin creation
         }
 
-        return redirect()->route('admin.payments.index')->with('success', 'Status pembayaran berhasil diperbarui.');
+        return redirect()->route('admin.payments.index')->with('success', 'Status verifikasi admin berhasil diperbarui.');
     }
 }
