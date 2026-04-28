@@ -1,0 +1,329 @@
+<x-admin-layout>
+    <x-slot name="header">
+        <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold leading-tight text-gray-900 dark:text-white">
+                {{ __('Edit Kategori') }}
+            </h2>
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{{ route('admin.dashboard') }}"
+                            class="inline-flex items-center text-sm font-medium text-gray-700 hover:text-blue-600 dark:text-gray-400 dark:hover:text-white">
+                            <svg class="w-3 h-3 mr-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                                fill="currentColor" viewBox="0 0 20 20">
+                                <path
+                                    d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z" />
+                            </svg>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li>
+                        <div class="flex items-center">
+                            <svg class="w-3 h-3 mx-1 text-gray-400 rtl:rotate-180" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m1 9 4-4-4-4" />
+                            </svg>
+                            <a href="{{ route('kategori.index') }}"
+                                class="ml-1 text-sm font-medium text-gray-700 hover:text-blue-600 md:ml-2 dark:text-gray-400 dark:hover:text-white">Kategori</a>
+                        </div>
+                    </li>
+                    <li aria-current="page">
+                        <div class="flex items-center">
+                            <svg class="w-3 h-3 mx-1 text-gray-400 rtl:rotate-180" aria-hidden="true"
+                                xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                    stroke-width="2" d="m1 9 4-4-4-4" />
+                            </svg>
+                            <span class="ml-1 text-sm font-medium text-gray-500 md:ml-2 dark:text-gray-400">Edit</span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </x-slot>
+
+    <style>
+        @keyframes slideInFromTop {
+            0% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes slideInFromBottom {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+
+        .animate-slideInFromTop {
+            animation: slideInFromTop 0.6s ease-out forwards;
+        }
+
+        .animate-slideInFromBottom {
+            animation: slideInFromBottom 0.6s ease-out forwards;
+        }
+
+        .animate-fadeIn {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        .custom-select {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.75rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .custom-select-dark {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2338bdf8' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.75rem center;
+            background-repeat: no-repeat;
+            background-size: 1.25em 1.25em;
+            padding-right: 2.75rem;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .glass-effect {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+    </style>
+
+    <div class="min-h-screen py-8 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+        <div class="max-w-2xl px-4 mx-auto sm:px-6 lg:px-8">
+
+            {{-- Success Message --}}
+            @if (session('success'))
+                <div
+                    class="p-4 mb-6 border border-green-200 rounded-lg bg-green-50 dark:bg-green-900/20 dark:border-green-800 animate-slideInFromTop">
+                    <div class="flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-green-600 dark:text-green-400" fill="currentColor"
+                            viewBox="0 0 20 20">
+                            <path fill-rule="evenodd"
+                                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                clip-rule="evenodd" />
+                        </svg>
+                        <p class="text-sm font-medium text-green-600 dark:text-green-400">
+                            {{ session('success') }}
+                        </p>
+                    </div>
+                </div>
+            @endif
+
+            {{-- Main Form Card --}}
+            <div
+                class="bg-white border border-gray-200 shadow-xl dark:bg-gray-800 rounded-2xl dark:shadow-2xl glass-effect dark:border-gray-700 animate-slideInFromBottom">
+
+                {{-- Card Header --}}
+                <div class="px-6 py-8 border-b border-gray-200 sm:px-8 dark:border-gray-700">
+                    <div class="flex items-center space-x-4">
+                        <div class="flex-shrink-0">
+                            <div
+                                class="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-orange-500 to-red-600 rounded-xl">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-xl font-bold text-gray-900 dark:text-white">
+                                Edit Kategori
+                            </h3>
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                Perbarui informasi kategori "<span
+                                    class="font-semibold text-gray-900 dark:text-white">{{ $kategori->nama }}</span>"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Form Body --}}
+                <div class="px-6 py-8 sm:px-8">
+                    <form action="{{ route('kategori.update', $kategori->id) }}" method="POST" class="space-y-6">
+                        @csrf
+                        @method('PUT')
+
+                        {{-- Info Card --}}
+                        <div
+                            class="p-4 border border-blue-200 rounded-lg bg-blue-50 dark:bg-blue-900/20 dark:border-blue-800">
+                            <div class="flex items-start">
+                                <div class="flex-shrink-0">
+                                    <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5" fill="currentColor"
+                                        viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="flex-1 ml-3 md:flex md:justify-between">
+                                    <div>
+                                        <p class="text-sm text-blue-700 dark:text-blue-300">
+                                            <strong>ID Kategori:</strong> #{{ $kategori->id }}
+                                        </p>
+                                        <p class="mt-1 text-sm text-blue-700 dark:text-blue-300">
+                                            <strong>Dibuat:</strong> {{ $kategori->created_at->format('d M Y H:i') }}
+                                        </p>
+                                    </div>
+                                    @if ($kategori->updated_at != $kategori->created_at)
+                                        <div class="mt-2 md:mt-0 md:ml-6">
+                                            <p class="text-sm text-blue-700 dark:text-blue-300">
+                                                <strong>Terakhir diperbarui:</strong>
+                                                {{ $kategori->updated_at->format('d M Y H:i') }}
+                                            </p>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Nama Kategori Field --}}
+                        <div class="space-y-2">
+                            <label for="nama" class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                    </svg>
+                                    Nama Kategori
+                                    <span class="ml-1 text-red-500">*</span>
+                                </span>
+                            </label>
+                            <input type="text" name="nama" id="nama" required
+                                value="{{ old('nama', $kategori->nama) }}" placeholder="Masukkan nama kategori"
+                                class="block w-full px-4 py-3 text-gray-900 placeholder-gray-500 transition-colors duration-200 ease-in-out bg-white border border-gray-300 rounded-lg shadow-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400" />
+                            @error('nama')
+                                <div class="flex items-center mt-1 text-sm text-red-600 dark:text-red-400">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        {{-- Cobit Item Field --}}
+                        <div class="space-y-2">
+                            <label for="cobit_item_id"
+                                class="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-gray-500 dark:text-gray-400" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M9 5H7a2 2 0 00-2 2v4a2 2 0 002 2h2m6-6h2a2 2 0 012 2v4a2 2 0 01-2 2h-2m-6-6V9a2 2 0 012-2h4a2 2 0 012 2v2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    Cobit Item
+                                    <span class="ml-1 text-red-500">*</span>
+                                </span>
+                            </label>
+                            <select name="cobit_item_id" id="cobit_item_id" required
+                                class="block w-full px-4 py-3 text-gray-900 transition-colors duration-200 ease-in-out bg-white border border-gray-300 rounded-lg shadow-sm custom-select dark:custom-select-dark dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400">
+                                @foreach ($cobitItems as $item)
+                                    <option value="{{ $item->id }}"
+                                        {{ $item->id == old('cobit_item_id', $kategori->cobit_item_id) ? 'selected' : '' }}
+                                        class="dark:bg-gray-700 dark:text-white">
+                                        {{ $item->nama_item }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('cobit_item_id')
+                                <div class="flex items-center mt-1 text-sm text-red-600 dark:text-red-400">
+                                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                    {{ $message }}
+                                </div>
+                            @enderror
+                        </div>
+
+                        {{-- Form Actions --}}
+                        <div
+                            class="flex flex-col pt-6 space-y-3 border-t border-gray-200 sm:flex-row sm:items-center sm:justify-between dark:border-gray-700 sm:space-y-0">
+                            <div class="flex items-center space-x-3">
+                                <a href="{{ route('kategori.index') }}"
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 ease-in-out bg-white border border-gray-300 rounded-lg shadow-sm dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                    </svg>
+                                    Kembali
+                                </a>
+
+                                {{-- <a href="{{ route('kategori.show', $kategori->id) }}"
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 ease-in-out bg-white border border-gray-300 rounded-lg shadow-sm dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                    Lihat Detail
+                                </a> --}}
+                            </div>
+
+                            <div class="flex items-center space-x-3">
+                                <button type="reset"
+                                    class="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-700 transition-colors duration-200 ease-in-out bg-white border border-gray-300 rounded-lg shadow-sm dark:border-gray-600 dark:text-gray-300 dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                                    </svg>
+                                    Reset
+                                </button>
+
+                                <button type="submit"
+                                    class="inline-flex items-center justify-center px-6 py-3 text-sm font-semibold text-white transition-all duration-200 transform border border-transparent rounded-lg shadow-sm bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 dark:focus:ring-offset-gray-800 hover:scale-105">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z">
+                                        </path>
+                                    </svg>
+                                    Update Kategori
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-admin-layout>
