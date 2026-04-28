@@ -21,7 +21,13 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (config('app.env') !== 'local') {
-         URL::forceScheme('https');
-    }
+            URL::forceScheme('https');
+        }
+
+        // Share site settings with all views
+        if (!app()->runningInConsole() && \Schema::hasTable('site_settings')) {
+            $site_settings = \App\Models\SiteSetting::all()->pluck('value', 'key')->toArray();
+            view()->share('site_settings', $site_settings);
+        }
     }
 }

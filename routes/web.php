@@ -30,6 +30,10 @@ Route::get('/', function () {
     return view('auth/login');
 });
 
+Route::get('/kebijakan', function () {
+    return view('policy');
+})->name('policy');
+
 Route::get('/menunggu-persetujuan', [PageController::class, 'pending'])
     ->name('registration.pending');
 
@@ -141,6 +145,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.packages.toggle-active');
     Route::patch('packages/{package}/toggle-popular', [\App\Http\Controllers\Admin\AdminPackageController::class, 'togglePopular'])
         ->name('admin.packages.toggle-popular');
+
+    // Site Settings
+    Route::get('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])
+        ->name('admin.settings.index');
+    Route::put('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'update'])
+        ->name('admin.settings.update');
 
 });
 
