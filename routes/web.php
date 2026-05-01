@@ -27,22 +27,22 @@ use App\Http\Controllers\Admin\AdminPaymentController;
 
 
 Route::get('/', function () {
-    return view('auth/login');
+    return view('home');
 });
+
+Route::get('/home', function () {
+    return view('home');
+})->name('home');
 
 Route::get('/kebijakan', function () {
     return view('policy');
 })->name('policy');
 
+Route::get('/pricing', [PaymentController::class, 'index'])->name('pricing.index');
+
 Route::get('/menunggu-persetujuan', [PageController::class, 'pending'])
     ->name('registration.pending');
 
-// Dashboard
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/home', function () {
-        return view('home');
-    })->name('home');
-});
 
 // User profile
 Route::middleware('auth')->group(function () {
@@ -210,9 +210,8 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 
 
     // ================= PAYMENT ROUTES (USER) ================
-    // Pricing
-    Route::get('/pricing', [PaymentController::class, 'index'])
-        ->name('pricing.index');
+// Public pricing moved up
+
 
     // Checkout halaman
     Route::get('/checkout/{package}', [PaymentController::class, 'checkout'])

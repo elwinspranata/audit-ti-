@@ -11,12 +11,20 @@ class UserApprovalController extends Controller
 {
     public function index()
     {
+        if (auth()->user()->email !== 'admin@example.com') {
+            abort(403, 'Hanya admin utama (admin@example.com) yang dapat mengakses halaman ini.');
+        }
+
         $pendingUsers = User::where('is_approved', false)->get();
         return view('admin.approvals.index', compact('pendingUsers'));
     }
 
     public function approve(User $user)
     {
+        if (auth()->user()->email !== 'admin@example.com') {
+            abort(403, 'Hanya admin utama yang dapat menyetujui user.');
+        }
+
         if (!$user->is_approved) {
             $user->is_approved = true;
             $user->email_verified_at = now();
@@ -33,6 +41,10 @@ class UserApprovalController extends Controller
      */
     public function reject(User $user)
     {
+        if (auth()->user()->email !== 'admin@example.com') {
+            abort(403, 'Hanya admin utama yang dapat menolak user.');
+        }
+
         $userName = $user->name;
         $user->delete(); // <-- INTI LOGIKA: HAPUS USER DARI DATABASE
 

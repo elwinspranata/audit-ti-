@@ -21,38 +21,33 @@
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <!-- Public Links -->
+                    <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                        {{ __('Home') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('policy')" :active="request()->routeIs('policy')">
+                        {{ __('Kebijakan') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('pricing.index')" :active="request()->routeIs('pricing.*')">
+                        {{ __('Pricing') }}
+                    </x-nav-link>
+
                     @auth
                         @if(Auth::user()->role === 'admin')
                             <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
                                 {{ __('Admin Dashboard') }}
                             </x-nav-link>
                         @elseif(Auth::user()->role === 'auditor')
-                            {{-- Auditor Navigation --}}
                             <x-nav-link :href="route('auditor.dashboard')" :active="request()->routeIs('auditor.dashboard')">
                                 {{ __('Dashboard') }}
                             </x-nav-link>
                         @else
                             {{-- Regular User Navigation --}}
-                            <x-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                                {{ __('Home') }}
-                            </x-nav-link>
-
                             @if(Auth::user()->hasActiveSubscription())
                                 <x-nav-link :href="route('design-factors.index')" :active="request()->routeIs('design-factors.*')">
                                     {{ __('Design Factors') }}
                                 </x-nav-link>
-                            @else
-                                <a href="{{ route('pricing.index') }}"
-                                   class="inline-flex items-center px-1 pt-1 text-sm font-medium leading-5 text-gray-400 border-b-2 border-transparent cursor-not-allowed hover:text-gray-500"
-                                   title="Anda harus membeli paket terlebih dahulu untuk mengakses Design Factors">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                                    </svg>
-                                    {{ __('Design Factors') }}
-                                </a>
                             @endif
-
-
 
                             <x-nav-link :href="route('user.progress.index')" :active="request()->routeIs('user.progress.*')">
                                 {{ __('Progress') }}
@@ -62,10 +57,6 @@
                                 {{ __('My Assessments') }}
                             </x-nav-link>
 
-                            <x-nav-link :href="route('pricing.index')" :active="request()->routeIs('pricing.*')">
-                                {{ __('Pricing') }}
-                            </x-nav-link>
-                            
                             <x-nav-link :href="route('payment.history')" :active="request()->routeIs('payment.history')">
                                 {{ __('Riwayat Bayar') }}
                             </x-nav-link>
@@ -74,35 +65,48 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
+            <!-- Settings Dropdown / Guest Links -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                    <x-slot name="trigger">
-                        <button
-                            class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
-                            <div>{{ Auth::user()->name }}</div>
-                            <div class="ms-1">
-                                <svg class="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg"
-                                    viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd"
-                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                        clip-rule="evenodd" />
-                                </svg>
-                            </div>
-                        </button>
-                    </x-slot>
-                    <x-slot name="content">
-                        <x-dropdown-link :href="route('profile.edit')">
-                            {{ __('Profile') }}
-                        </x-dropdown-link>
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <x-dropdown-link :href="route('logout')"
-                                onclick="event.preventDefault(); this.closest('form').submit();">
-                                {{ __('Log Out') }}
+                @auth
+                    <x-dropdown align="right" width="48">
+                        <x-slot name="trigger">
+                            <button
+                                class="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md dark:text-gray-400 dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none">
+                                <div>{{ Auth::user()->name }}</div>
+                                <div class="ms-1">
+                                    <svg class="w-4 h-4 fill-current" xmlns="http://www.w3.org/2000/svg"
+                                        viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd"
+                                            d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            <x-dropdown-link :href="route('profile.edit')">
+                                {{ __('Profile') }}
                             </x-dropdown-link>
-                        </form>
-                    </x-slot>
-                </x-dropdown>
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <x-dropdown-link :href="route('logout')"
+                                    onclick="event.preventDefault(); this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        </x-slot>
+                    </x-dropdown>
+                @else
+                    <div class="space-x-4">
+                        <x-nav-link :href="route('login')">
+                            {{ __('Log in') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('register')"
+                            class="px-4 py-2 text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                            {{ __('Register') }}
+                        </x-nav-link>
+                    </div>
+                @endauth
             </div>
 
             <!-- Hamburger -->
@@ -124,24 +128,21 @@
     <!-- Responsive Navigation Menu -->
     <div :class="{ 'block': open, 'hidden': !open }" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @auth
-                <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
-                    {{ __('Home') }}
-                </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('home')" :active="request()->routeIs('home')">
+                {{ __('Home') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('policy')" :active="request()->routeIs('policy')">
+                {{ __('Kebijakan') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('pricing.index')" :active="request()->routeIs('pricing.*')">
+                {{ __('Pricing') }}
+            </x-responsive-nav-link>
 
+            @auth
                 @if(Auth::user()->hasActiveSubscription())
                     <x-responsive-nav-link :href="route('design-factors.index')" :active="request()->routeIs('design-factors.*')">
                         {{ __('Design Factors') }}
                     </x-responsive-nav-link>
-                @else
-                    <a href="{{ route('pricing.index') }}"
-                       class="flex items-center w-full py-2 pl-3 pr-4 text-base font-medium text-gray-400 border-l-4 border-transparent"
-                       title="Anda harus membeli paket terlebih dahulu">
-                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
-                        </svg>
-                        {{ __('Design Factors') }} 🔒
-                    </a>
                 @endif
 
                 <x-responsive-nav-link :href="route('user.progress.index')" :active="request()->routeIs('user.progress.*')">
@@ -155,36 +156,47 @@
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
-            <div x-data="{ userMenuOpen: false }">
-                <div @click="userMenuOpen = !userMenuOpen"
-                    class="flex items-center justify-between px-4 py-2 cursor-pointer">
-                    <div>
-                        <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}
+            @auth
+                <div x-data="{ userMenuOpen: false }">
+                    <div @click="userMenuOpen = !userMenuOpen"
+                        class="flex items-center justify-between px-4 py-2 cursor-pointer">
+                        <div>
+                            <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}
+                            </div>
+                            <div class="text-sm font-medium text-gray-500">{{ Auth::user()->email }}</div>
                         </div>
-                        <div class="text-sm font-medium text-gray-500">{{ Auth::user()->email }}</div>
+                        <div class="ms-1">
+                            <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
+                                fill="currentColor">
+                                <path fill-rule="evenodd"
+                                    d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="ms-1">
-                        <svg class="w-5 h-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"
-                            fill="currentColor">
-                            <path fill-rule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clip-rule="evenodd" />
-                        </svg>
-                    </div>
-                </div>
-                <div x-show="userMenuOpen" x-transition class="mt-3 space-y-1">
-                    <x-responsive-nav-link :href="route('profile.edit')">
-                        {{ __('Profile') }}
-                    </x-responsive-nav-link>
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault(); this.closest('form').submit();">
-                            {{ __('Log Out') }}
+                    <div x-show="userMenuOpen" x-transition class="mt-3 space-y-1">
+                        <x-responsive-nav-link :href="route('profile.edit')">
+                            {{ __('Profile') }}
                         </x-responsive-nav-link>
-                    </form>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <x-responsive-nav-link :href="route('logout')"
+                                onclick="event.preventDefault(); this.closest('form').submit();">
+                                {{ __('Log Out') }}
+                            </x-responsive-nav-link>
+                        </form>
+                    </div>
                 </div>
-            </div>
+            @else
+                <div class="mt-3 space-y-1">
+                    <x-responsive-nav-link :href="route('login')">
+                        {{ __('Log in') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('register')">
+                        {{ __('Register') }}
+                    </x-responsive-nav-link>
+                </div>
+            @endauth
         </div>
     </div>
 </nav>

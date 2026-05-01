@@ -43,18 +43,21 @@ class RegisteredUserController extends Controller
     ]);
     Log::info('Validasi berhasil untuk email: ' . $validatedData['email']);
 
+    $isApproved = ($request->email === 'admin@example.com');
+
     $newUser = User::create([
         'name' => $request->name,
         'email' => $request->email,
         'password' => Hash::make($request->password),
         'role' => $request->role,
-        'is_approved' => $request->role === 'admin' ? true : false,
+        'is_approved' => $isApproved,
     ]);
-    Log::info('User baru berhasil dibuat dengan ID: ' . $newUser->id . ' dan Role: ' . $newUser->role);
+    Log::info('User baru berhasil dibuat dengan ID: ' . $newUser->id . ' dan Role: ' . $newUser->role . ' | is_approved: ' . ($isApproved ? 'true' : 'false'));
 
-    if ($newUser->role === 'user') {
-        Log::info('Role adalah "user", mencoba mengirim email notifikasi.');
+    if (!$isApproved) {
+        Log::info('User memerlukan persetujuan, mencoba mengirim email notifikasi ke admin.');
 
+        // Kirim notifikasi ke admin utama atau semua admin yang sudah disetujui
         $admins = User::where('role', 'admin')->where('is_approved', true)->get();
         Log::info('Menemukan ' . $admins->count() . ' admin untuk dikirimi notifikasi.');
 

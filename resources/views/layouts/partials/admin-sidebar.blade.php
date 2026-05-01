@@ -33,6 +33,7 @@
         </x-sidebar-link>
 
         <!-- User Approvals -->
+        @if(auth()->user()->email === 'admin@example.com')
         <x-sidebar-link :href="route('admin.approvals.index')" :active="request()->routeIs('admin.approvals.index')">
             <!-- Heroicon: user-check -->
             <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
@@ -42,6 +43,7 @@
             </svg>
             {{ __('User Approvals') }}
         </x-sidebar-link>
+        @endif
 
         <!-- Assessment Approvals -->
         <x-sidebar-link :href="route('admin.assessments.index')" :active="request()->routeIs('admin.assessments.*')">
