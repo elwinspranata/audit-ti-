@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminProfileController;
 use App\Http\Controllers\Admin\UserApprovalController;
 use App\Http\Controllers\Admin\AdminCouponController;
+use App\Http\Controllers\Admin\AdminServiceTypeController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PageController;
@@ -145,6 +146,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         ->name('admin.packages.toggle-active');
     Route::patch('packages/{package}/toggle-popular', [\App\Http\Controllers\Admin\AdminPackageController::class, 'togglePopular'])
         ->name('admin.packages.toggle-popular');
+
+    // Service Types Management
+    Route::resource('service-types', AdminServiceTypeController::class)->names('admin.service-types');
+    Route::patch('service-types/{serviceType}/toggle-active', [AdminServiceTypeController::class, 'toggleActive'])
+        ->name('admin.service-types.toggle-active');
 
     // Site Settings
     Route::get('/settings', [\App\Http\Controllers\Admin\SiteSettingController::class, 'index'])

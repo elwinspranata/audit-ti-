@@ -15,6 +15,7 @@ use App\Models\Assessment;
 use App\Models\AssessmentItem;
 use App\Models\CobitItem;
 use App\Models\User;
+use App\Models\ServiceType;
 
 class PaymentController extends Controller
 {
@@ -36,7 +37,8 @@ class PaymentController extends Controller
             }])
             ->orderBy('level')
             ->get();
-        return view('payment.pricing', compact('packages'));
+        $serviceTypes = ServiceType::where('is_active', true)->orderBy('sort_order')->get();
+        return view('payment.pricing', compact('packages', 'serviceTypes'));
     }
 
     // 2. Proses checkout

@@ -180,6 +180,15 @@
             {{ __('Manajemen Paket') }}
         </x-sidebar-link>
 
+        <!-- Jenis Layanan -->
+        <x-sidebar-link :href="route('admin.service-types.index')" :active="request()->routeIs('admin.service-types.*')">
+            <!-- Heroicon: view-list -->
+            <svg class="w-6 h-6 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+            {{ __('Jenis Layanan') }}
+        </x-sidebar-link>
+
         <!-- Voucher Management -->
         <x-sidebar-link :href="route('admin.coupons.index')" :active="request()->routeIs('admin.coupons.*')">
             <!-- Heroicon: ticket -->
