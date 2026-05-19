@@ -1,4 +1,4 @@
-﻿<x-app-layout>
+<x-app-layout>
     <x-slot name="header">
         <div class="text-center">
             <h2 class="text-3xl font-bold leading-tight tracking-wide text-gray-800 dark:text-white">
@@ -280,13 +280,7 @@
             </div>
             @endif
 
-            <!-- Additional Info -->
-            <div class="mt-12 text-center">
-                <p class="text-gray-500 dark:text-gray-400 text-sm">
-                    Butuh bantuan memilih paket? 
-                    <a href="#" class="text-blue-600 dark:text-blue-400 hover:underline font-medium">Hubungi tim kami</a>
-                </p>
-            </div>
+
 
             <script>
                 function toggleService(id) {
